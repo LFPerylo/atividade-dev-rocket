@@ -39,6 +39,7 @@ export function FiltersPanel({ filters, onChange }: FiltersPanelProps) {
       </Field>
       <Field id="filtro-ano-de" label="Ano de">
         <Input
+          key={filters.anoDe ?? 'vazio'}
           id="filtro-ano-de"
           type="number"
           inputMode="numeric"
@@ -49,6 +50,7 @@ export function FiltersPanel({ filters, onChange }: FiltersPanelProps) {
       </Field>
       <Field id="filtro-ano-ate" label="Ano até">
         <Input
+          key={filters.anoAte ?? 'vazio'}
           id="filtro-ano-ate"
           type="number"
           inputMode="numeric"

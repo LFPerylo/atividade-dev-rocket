@@ -11,7 +11,17 @@ type SearchBarProps = {
 
 export function SearchBar({ initialValue, onSearch }: SearchBarProps) {
   const [term, setTerm] = useState(initialValue)
-  const debouncedSearch = useDebouncedCallback(onSearch, SEARCH_DELAY_MS)
+  const [syncedValue, setSyncedValue] = useState(initialValue)
+  const [emittedValue, setEmittedValue] = useState(initialValue)
+  const debouncedSearch = useDebouncedCallback((value: string) => {
+    setEmittedValue(value)
+    onSearch(value)
+  }, SEARCH_DELAY_MS)
+
+  if (initialValue !== syncedValue) {
+    setSyncedValue(initialValue)
+    if (initialValue !== emittedValue) setTerm(initialValue)
+  }
 
   return (
     <div className="relative">
