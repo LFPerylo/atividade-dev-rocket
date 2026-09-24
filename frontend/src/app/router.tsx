@@ -2,12 +2,14 @@ import { createBrowserRouter, Outlet } from 'react-router-dom'
 
 import { Layout } from '@/app/Layout'
 import { NotFoundPage } from '@/app/NotFoundPage'
+import { PageLoading } from '@/app/PageLoading'
 import { RequireAuth } from '@/features/auth/RequireAuth'
 import { CatalogPage } from '@/features/movies/pages/CatalogPage'
 
 export const router = createBrowserRouter([
   {
     element: <Layout />,
+    hydrateFallbackElement: <PageLoading />,
     children: [
       { index: true, element: <CatalogPage /> },
       {

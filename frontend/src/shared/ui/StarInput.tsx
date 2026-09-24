@@ -39,7 +39,7 @@ export function StarInput({ value, onChange, invalid = false, describedBy }: Sta
             STAR_VALUES.includes(option) ? (
               <label
                 key={option}
-                className="h-full flex-1 cursor-pointer rounded-sm has-focus-visible:outline-2 has-focus-visible:outline-accent-400"
+                className="relative h-full flex-1 cursor-pointer rounded-sm has-focus-visible:outline-2 has-focus-visible:outline-accent-400"
               >
                 <input
                   type="radio"
