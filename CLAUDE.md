@@ -8,6 +8,7 @@ Design completo em `docs/superpowers/specs/2026-09-24-sistema-avaliacao-filmes-d
 - Backend: FastAPI, SQLAlchemy 2.0 async (aiosqlite), Alembic, Pydantic v2, PyJWT, pwdlib (argon2). Python 3.12, gerenciado com `uv`.
 - Frontend: Vite, React, TypeScript, React Router, TanStack Query, react-hook-form + zod, Tailwind CSS.
 - Testes: pytest (+ pytest-asyncio, httpx), Vitest + Testing Library + MSW, Playwright, Storybook.
+- Qualidade: ruff + mypy strict no backend; oxlint + tsc + Prettier no frontend.
 - Banco: SQLite (`backend/rocketlab.db`). Dados iniciais em `backend/data/seed/*.csv.gz`.
 
 ## Comandos
@@ -18,8 +19,9 @@ make migrate      # alembic upgrade head
 make seed         # carrega os CSVs (idempotente); make seed-reset recarrega do zero
 make dev          # backend :8000 e frontend :5173
 make test         # pytest + vitest
-make lint         # ruff, mypy, eslint, tsc
-make e2e          # Playwright
+make lint         # ruff, mypy, oxlint, tsc, prettier
+make e2e          # Playwright (sobe API e web com banco e2e.db)
+make storybook    # Storybook em :6006
 docker compose up --build   # produto completo em http://localhost:8080
 ```
 
