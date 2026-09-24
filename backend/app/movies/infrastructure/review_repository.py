@@ -1,4 +1,4 @@
-from sqlalchemy import func, literal_column, select
+from sqlalchemy import ColumnClause, func, literal_column, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.movies.domain.entities import NewReview, Review
@@ -7,7 +7,7 @@ from app.movies.infrastructure.mappers import to_review
 from app.movies.infrastructure.rating_summary import refresh_movie_summary
 from app.movies.models import MovieReview
 
-INSERTION_ORDER = literal_column("movie_reviews.rowid")
+INSERTION_ORDER: ColumnClause[int] = literal_column("movie_reviews.rowid")
 
 
 class SqlAlchemyReviewRepository:
