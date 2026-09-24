@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import ROUND_HALF_UP, Decimal
 
 from app.movies.domain.errors import InvalidRating
 
@@ -8,8 +9,12 @@ STAR_STEP = 0.5
 SCORE_PER_STAR = 2.0
 
 
+STARS_PRECISION = Decimal("0.1")
+
+
 def score_to_stars(score: float) -> float:
-    return round(score / SCORE_PER_STAR, 1)
+    stars = Decimal(str(score)) / Decimal(str(SCORE_PER_STAR))
+    return float(stars.quantize(STARS_PRECISION, rounding=ROUND_HALF_UP))
 
 
 @dataclass(frozen=True, slots=True)

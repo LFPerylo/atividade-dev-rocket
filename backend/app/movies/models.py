@@ -200,7 +200,7 @@ class FactMoviePerformance(Base):
     orcamento_brl: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), default=None)
     receita_brl: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), default=None)
     lucro_brl: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=0)
-    popularidade: Mapped[float | None] = mapped_column(Double, default=None)
+    popularidade: Mapped[float | None] = mapped_column(Double, index=True, default=None)
     nota_tmdb: Mapped[float | None] = mapped_column(Double, default=None)
     qtd_tmdb: Mapped[int | None] = mapped_column(Integer, default=None)
     nota_imdb: Mapped[float | None] = mapped_column(Double, default=None)
@@ -241,6 +241,6 @@ class DimReview(Base):
         String(64), ForeignKey("dim_movies.sk_movie_id", ondelete="CASCADE"), unique=True
     )
     qtd_avaliacoes_usuarios: Mapped[int] = mapped_column(Integer, default=0)
-    nota_media_usuarios: Mapped[float | None] = mapped_column(Double, default=None)
+    nota_media_usuarios: Mapped[float | None] = mapped_column(Double, index=True, default=None)
 
     movie: Mapped[DimMovie] = relationship(back_populates="reviews_summary")

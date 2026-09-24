@@ -15,7 +15,9 @@ def test_stars_reject_values_outside_half_steps_between_one_and_five(value: floa
         Stars.from_value(value)
 
 
-@pytest.mark.parametrize(("score", "stars"), [(9.8, 4.9), (0.0, 0.0), (10.0, 5.0), (7.25, 3.6)])
+@pytest.mark.parametrize(
+    ("score", "stars"), [(9.8, 4.9), (0.0, 0.0), (10.0, 5.0), (7.25, 3.6), (6.5, 3.3), (6.3, 3.2)]
+)
 def test_score_to_stars_halves_score_with_one_decimal(score: float, stars: float) -> None:
     assert score_to_stars(score) == stars
 

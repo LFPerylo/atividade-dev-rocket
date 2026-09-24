@@ -40,6 +40,7 @@ addopts = "--strict-markers"
 
 [tool.coverage.run]
 source = ["app"]
+concurrency = ["greenlet", "thread"]
 omit = ["app/cli.py"]
 
 [tool.coverage.report]

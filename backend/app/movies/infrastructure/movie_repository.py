@@ -39,7 +39,7 @@ class SqlAlchemyMovieRepository:
 
     async def search(self, filters: MovieFilters, page: PageRequest) -> Page[MovieSummary]:
         conditions = self._conditions(filters)
-        total = await self._session.scalar(self._count(conditions)) or 0
+        total = await self._session.scalar(self._count(conditions, filters)) or 0
         rows = (await self._session.execute(self._page(conditions, filters, page))).all()
         movie_ids = [row.sk_movie_id for row in rows]
         genres = await self._genres_by_movie(movie_ids)
@@ -180,8 +180,15 @@ class SqlAlchemyMovieRepository:
             DimReview, DimReview.sk_movie_id == DimMovie.sk_movie_id
         ).outerjoin(FactMoviePerformance, FactMoviePerformance.sk_movie_id == DimMovie.sk_movie_id)
 
-    def _count(self, conditions: list[ColumnElement[bool]]) -> Select[tuple[int]]:
-        return self._base(select(func.count(DimMovie.sk_movie_id))).where(*conditions)
+    def _count(
+        self, conditions: list[ColumnElement[bool]], filters: MovieFilters
+    ) -> Select[tuple[int]]:
+        statement = select(func.count(DimMovie.sk_movie_id))
+        if filters.min_stars is not None:
+            statement = statement.outerjoin(
+                DimReview, DimReview.sk_movie_id == DimMovie.sk_movie_id
+            )
+        return statement.where(*conditions)
 
     def _page(
         self, conditions: list[ColumnElement[bool]], filters: MovieFilters, page: PageRequest
