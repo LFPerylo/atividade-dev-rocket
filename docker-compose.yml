@@ -1,0 +1,24 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-claquete-docker-local-troque-este-segredo-em-producao}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@rocketlab.dev}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrador}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-rocketlab2026}
+      LOG_LEVEL: INFO
+    volumes:
+      - claquete-data:/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  claquete-data:
