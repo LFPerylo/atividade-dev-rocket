@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 import pytest
 from sqlalchemy import func, select, update
@@ -15,8 +16,8 @@ def repository(session: AsyncSession) -> SqlAlchemyMovieRepository:
     return SqlAlchemyMovieRepository(session)
 
 
-async def search_titles(repository: SqlAlchemyMovieRepository, **filters: object) -> list[str]:
-    page = await repository.search(MovieFilters(**filters), PageRequest())  # type: ignore[arg-type]
+async def search_titles(repository: SqlAlchemyMovieRepository, **filters: Any) -> list[str]:
+    page = await repository.search(MovieFilters(**filters), PageRequest())
     return [movie.title for movie in page.items]
 
 

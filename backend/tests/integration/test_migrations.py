@@ -4,9 +4,7 @@ from alembic.autogenerate import compare_metadata
 from alembic.runtime.migration import MigrationContext
 from sqlalchemy import create_engine, inspect
 
-from app.auth.infrastructure import models as auth_models  # noqa: F401
-from app.db.base import Base
-from app.movies import models as movie_models  # noqa: F401
+from app.db.registry import registered_metadata
 from tests.support import migrate
 
 
@@ -25,6 +23,6 @@ def test_migrations_match_orm_models(tmp_path: Path) -> None:
 
     with create_engine(url).connect() as connection:
         context = MigrationContext.configure(connection, opts={"render_as_batch": True})
-        differences = compare_metadata(context, Base.metadata)
+        differences = compare_metadata(context, registered_metadata())
 
     assert differences == []

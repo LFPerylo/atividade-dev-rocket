@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Any
 
 import pytest
 
@@ -7,15 +8,15 @@ from app.movies.domain.errors import InvalidMovieData, InvalidReview
 from app.movies.domain.rating import Stars
 
 
-def make_draft(**overrides: object) -> MovieDraft:
-    values: dict[str, object] = {
+def make_draft(**overrides: Any) -> MovieDraft:
+    values: dict[str, Any] = {
         "title": "Cidade de Deus",
         "directors": ("Fernando Meirelles",),
         "genre_ids": ("g-drama",),
         "release_year": 2002,
     }
     values.update(overrides)
-    return MovieDraft(**values)  # type: ignore[arg-type]
+    return MovieDraft(**values)
 
 
 def test_draft_trims_title_and_director_names() -> None:

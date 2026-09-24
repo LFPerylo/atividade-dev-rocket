@@ -3,17 +3,15 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from app.auth.infrastructure import models as auth_models  # noqa: F401
 from app.core.config import get_settings
-from app.db.base import Base
-from app.movies import models  # noqa: F401  Registra as tabelas no metadata.
+from app.db.registry import registered_metadata
 
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = Base.metadata
+target_metadata = registered_metadata()
 
 # A aplicação usa a variante assíncrona do driver SQLite; o Alembic executa
 # DDL de forma síncrona sobre o mesmo arquivo de banco.

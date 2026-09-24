@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from sqlalchemy import ColumnElement, Select, delete, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import QueryableAttribute, selectinload
 
 from app.movies.domain.entities import Genre, MovieDetails, MovieDraft, MovieSummary, PersonRole
 from app.movies.domain.queries import MovieFilters, Page, PageRequest, SortField, SortOrder
@@ -21,11 +21,11 @@ from app.movies.models import (
     bridge_movie_person,
 )
 
-SORT_COLUMNS: dict[SortField, ColumnElement[object]] = {
-    SortField.TITLE: DimMovie.titulo,  # type: ignore[dict-item]
-    SortField.YEAR: DimMovie.ano_lancamento,  # type: ignore[dict-item]
-    SortField.RATING: DimReview.nota_media_usuarios,  # type: ignore[dict-item]
-    SortField.POPULARITY: FactMoviePerformance.popularidade,  # type: ignore[dict-item]
+SORT_COLUMNS: dict[SortField, QueryableAttribute[Any]] = {
+    SortField.TITLE: DimMovie.titulo,
+    SortField.YEAR: DimMovie.ano_lancamento,
+    SortField.RATING: DimReview.nota_media_usuarios,
+    SortField.POPULARITY: FactMoviePerformance.popularidade,
 }
 
 
