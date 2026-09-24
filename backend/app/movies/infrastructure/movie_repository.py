@@ -9,7 +9,7 @@ from sqlalchemy.orm import selectinload
 
 from app.movies.domain.entities import Genre, MovieDetails, MovieDraft, MovieSummary, PersonRole
 from app.movies.domain.queries import MovieFilters, Page, PageRequest, SortField, SortOrder
-from app.movies.domain.rating import SCORE_PER_STAR, RatingSummary
+from app.movies.domain.rating import RatingSummary, min_score_displayed_as
 from app.movies.infrastructure.mappers import to_genre, to_movie_details
 from app.movies.models import (
     DimGenre,
@@ -158,21 +158,24 @@ class SqlAlchemyMovieRepository:
         if filters.year_to is not None:
             conditions.append(DimMovie.ano_lancamento <= filters.year_to)
         if filters.min_stars is not None:
-            conditions.append(DimReview.nota_media_usuarios >= filters.min_stars * SCORE_PER_STAR)
+            minimum_score = min_score_displayed_as(filters.min_stars)
+            conditions.append(DimReview.nota_media_usuarios >= minimum_score)
         return conditions
 
     @staticmethod
     def _matches_search(term: str) -> ColumnElement[bool]:
-        pattern = f"%{term}%"
         directed_by = (
             select(bridge_movie_person.c.sk_movie_id)
             .join(DimPerson, DimPerson.sk_person_id == bridge_movie_person.c.sk_person_id)
             .where(
                 DimPerson.tipo_pessoa == PersonRole.DIRECTOR,
-                DimPerson.nome_pessoa.ilike(pattern),
+                DimPerson.nome_pessoa.icontains(term, autoescape=True),
             )
         )
-        return or_(DimMovie.titulo.ilike(pattern), DimMovie.sk_movie_id.in_(directed_by))
+        return or_(
+            DimMovie.titulo.icontains(term, autoescape=True),
+            DimMovie.sk_movie_id.in_(directed_by),
+        )
 
     @staticmethod
     def _base[T: tuple[Any, ...]](statement: Select[T]) -> Select[T]:

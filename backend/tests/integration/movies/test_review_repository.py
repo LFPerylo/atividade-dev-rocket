@@ -1,3 +1,5 @@
+from datetime import UTC
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -76,3 +78,11 @@ async def test_add_creates_summary_for_movie_without_reviews(
 
     assert movie is not None
     assert (movie.rating.count, movie.rating.average_stars) == (1, 5.0)
+
+
+async def test_reviews_expose_timezone_aware_utc_timestamps(
+    repository: SqlAlchemyReviewRepository,
+) -> None:
+    page = await repository.list_for_movie("m-cdd", PageRequest())
+
+    assert page.items[0].created_at.tzinfo is UTC

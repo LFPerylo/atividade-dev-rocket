@@ -4,7 +4,7 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.application.use_cases import AuthenticateAdmin, GetCurrentAdmin
+from app.auth.application.use_cases import DECOY_PASSWORD, AuthenticateAdmin, GetCurrentAdmin
 from app.auth.domain.entities import AdminUser
 from app.auth.domain.errors import InvalidToken
 from app.auth.infrastructure.admin_repository import SqlAlchemyAdminRepository
@@ -21,6 +21,7 @@ SessionDep = Annotated[AsyncSession, Depends(get_db)]
 
 bearer_scheme = HTTPBearer(auto_error=False)
 password_hasher = Argon2PasswordHasher()
+decoy_hash = password_hasher.hash(DECOY_PASSWORD)
 
 
 def get_token_service() -> JwtTokenService:
@@ -56,7 +57,9 @@ TransactionDep = Annotated[SqlAlchemyTransactionManager, Depends(get_transaction
 
 
 def get_authenticate_admin(session: SessionDep, tokens: TokenServiceDep) -> AuthenticateAdmin:
-    return AuthenticateAdmin(SqlAlchemyAdminRepository(session), password_hasher, tokens)
+    return AuthenticateAdmin(
+        SqlAlchemyAdminRepository(session), password_hasher, tokens, decoy_hash
+    )
 
 
 async def get_current_admin(

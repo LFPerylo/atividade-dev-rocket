@@ -1,13 +1,13 @@
 from datetime import date
 
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.movies.domain.entities import MovieDraft, PersonRole
 from app.movies.domain.queries import MovieFilters, PageRequest, SortField, SortOrder
 from app.movies.infrastructure.movie_repository import SqlAlchemyMovieRepository
-from app.movies.models import DimPerson, MovieReview
+from app.movies.models import DimPerson, DimReview, MovieReview
 
 
 @pytest.fixture
@@ -179,3 +179,25 @@ async def test_delete_removes_movie_and_its_reviews(
         select(func.count()).select_from(MovieReview).where(MovieReview.sk_movie_id == "m-cdd")
     )
     assert reviews == 0
+
+
+async def test_search_treats_like_wildcards_literally(
+    repository: SqlAlchemyMovieRepository,
+) -> None:
+    assert await search_titles(repository, search="_") == []
+    assert await search_titles(repository, search="%") == []
+
+
+async def test_min_stars_filter_uses_displayed_rounded_stars(
+    repository: SqlAlchemyMovieRepository, session: AsyncSession
+) -> None:
+    await session.execute(
+        update(DimReview).where(DimReview.sk_movie_id == "m-blind").values(nota_media_usuarios=7.95)
+    )
+
+    assert await search_titles(
+        repository, min_stars=4, sort=SortField.TITLE, order=SortOrder.ASC
+    ) == [
+        "Cidade de Deus",
+        "Ensaio sobre a Cegueira",
+    ]

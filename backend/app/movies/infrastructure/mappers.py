@@ -1,3 +1,5 @@
+from datetime import UTC
+
 from app.movies.domain.entities import (
     Genre,
     MovieDetails,
@@ -77,5 +79,5 @@ def to_review(model: MovieReview) -> Review:
         author=model.nome,
         score=model.nota,
         comment=model.comentario,
-        created_at=model.created_at,
+        created_at=model.created_at.replace(tzinfo=UTC),
     )

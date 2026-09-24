@@ -17,6 +17,11 @@ def score_to_stars(score: float) -> float:
     return float(stars.quantize(STARS_PRECISION, rounding=ROUND_HALF_UP))
 
 
+def min_score_displayed_as(stars: float) -> float:
+    half_step = STARS_PRECISION / 2
+    return float((Decimal(str(stars)) - half_step) * Decimal(str(SCORE_PER_STAR)))
+
+
 @dataclass(frozen=True, slots=True)
 class Stars:
     value: float

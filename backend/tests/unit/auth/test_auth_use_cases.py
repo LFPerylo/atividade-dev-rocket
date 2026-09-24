@@ -2,7 +2,12 @@ import pytest
 
 from app.auth.application.use_cases import AuthenticateAdmin, EnsureAdmin, GetCurrentAdmin
 from app.auth.domain.errors import InvalidAdminData, InvalidCredentials, InvalidToken
-from tests.unit.auth.fakes import FakeTokenService, InMemoryAdminRepository, PlainTextHasher
+from tests.unit.auth.fakes import (
+    CountingHasher,
+    FakeTokenService,
+    InMemoryAdminRepository,
+    PlainTextHasher,
+)
 from tests.unit.movies.fakes import SpyTransactionManager
 
 
@@ -95,3 +100,16 @@ async def test_get_current_admin_rejects_invalid_or_orphan_tokens(
 ) -> None:
     with pytest.raises(InvalidToken):
         await GetCurrentAdmin(admins, FakeTokenService()).execute(token)
+
+
+async def test_authenticate_verifies_a_hash_even_for_unknown_email(
+    admins: InMemoryAdminRepository,
+) -> None:
+    hasher = CountingHasher()
+
+    with pytest.raises(InvalidCredentials):
+        await AuthenticateAdmin(admins, hasher, FakeTokenService()).execute(
+            email="ninguem@rocketlab.dev", password="qualquer-senha"
+        )
+
+    assert hasher.verifications == 1

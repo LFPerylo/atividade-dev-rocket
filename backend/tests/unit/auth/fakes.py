@@ -10,6 +10,15 @@ class PlainTextHasher:
         return password_hash == f"hashed:{password}"
 
 
+class CountingHasher(PlainTextHasher):
+    def __init__(self) -> None:
+        self.verifications = 0
+
+    def verify(self, password: str, password_hash: str) -> bool:
+        self.verifications += 1
+        return super().verify(password, password_hash)
+
+
 class FakeTokenService:
     def issue(self, subject: str) -> AccessToken:
         return AccessToken(value=f"token:{subject}", expires_in_seconds=3600)

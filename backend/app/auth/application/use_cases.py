@@ -3,18 +3,27 @@ from app.auth.domain.errors import InvalidCredentials, InvalidToken
 from app.auth.domain.ports import AdminRepository, PasswordHasher, TokenService
 from app.shared.transaction import TransactionManager
 
+DECOY_PASSWORD = "senha-inexistente-para-tempo-constante"
+
 
 class AuthenticateAdmin:
     def __init__(
-        self, admins: AdminRepository, hasher: PasswordHasher, tokens: TokenService
+        self,
+        admins: AdminRepository,
+        hasher: PasswordHasher,
+        tokens: TokenService,
+        decoy_hash: str | None = None,
     ) -> None:
         self._admins = admins
         self._hasher = hasher
         self._tokens = tokens
+        self._decoy_hash = decoy_hash or hasher.hash(DECOY_PASSWORD)
 
     async def execute(self, email: str, password: str) -> AccessToken:
         admin = await self._admins.find_by_email(normalize_email(email))
-        if admin is None or not self._hasher.verify(password, admin.password_hash):
+        password_hash = admin.password_hash if admin else self._decoy_hash
+        password_matches = self._hasher.verify(password, password_hash)
+        if admin is None or not password_matches:
             raise InvalidCredentials()
         return self._tokens.issue(admin.id)
 
