@@ -1,8 +1,9 @@
 from app.movies.application.guards import ensure_genres_exist, ensure_movie_exists
 from app.movies.domain.entities import MovieDetails, MovieDraft, MovieSummary
 from app.movies.domain.errors import MovieNotFound
-from app.movies.domain.ports import GenreRepository, MovieRepository, TransactionManager
+from app.movies.domain.ports import GenreRepository, MovieRepository
 from app.movies.domain.queries import MovieFilters, Page, PageRequest
+from app.shared.transaction import TransactionManager
 
 
 class ListMovies:

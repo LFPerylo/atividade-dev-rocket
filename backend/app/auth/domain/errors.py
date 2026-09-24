@@ -1,0 +1,16 @@
+class AuthError(Exception):
+    pass
+
+
+class InvalidCredentials(AuthError):
+    def __init__(self) -> None:
+        super().__init__("E-mail ou senha inválidos")
+
+
+class InvalidToken(AuthError):
+    def __init__(self) -> None:
+        super().__init__("Sessão inválida ou expirada")
+
+
+class InvalidAdminData(AuthError):
+    pass

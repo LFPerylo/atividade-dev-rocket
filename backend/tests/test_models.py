@@ -1,9 +1,11 @@
+from app.auth.infrastructure import models as auth_models  # noqa: F401
 from app.db.base import Base
 from app.movies import models  # noqa: F401  Registra os modelos ORM.
 
 
 def test_movie_schema_registers_expected_tables() -> None:
     expected_tables = {
+        "admin_users",
         "bridge_movie_company",
         "bridge_movie_genre",
         "bridge_movie_person",

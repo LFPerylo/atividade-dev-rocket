@@ -1,7 +1,8 @@
 from app.movies.application.guards import ensure_movie_exists
 from app.movies.domain.entities import NewReview, Review
-from app.movies.domain.ports import MovieRepository, ReviewRepository, TransactionManager
+from app.movies.domain.ports import MovieRepository, ReviewRepository
 from app.movies.domain.queries import Page, PageRequest
+from app.shared.transaction import TransactionManager
 
 
 class AddReview:

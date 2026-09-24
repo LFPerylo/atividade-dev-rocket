@@ -1,0 +1,23 @@
+from typing import Protocol
+
+from app.auth.domain.entities import AccessToken, AdminUser
+
+
+class PasswordHasher(Protocol):
+    def hash(self, password: str) -> str: ...
+
+    def verify(self, password: str, password_hash: str) -> bool: ...
+
+
+class TokenService(Protocol):
+    def issue(self, subject: str) -> AccessToken: ...
+
+    def subject_of(self, token: str) -> str: ...
+
+
+class AdminRepository(Protocol):
+    async def find_by_email(self, email: str) -> AdminUser | None: ...
+
+    async def get(self, admin_id: str) -> AdminUser | None: ...
+
+    async def add(self, email: str, name: str, password_hash: str) -> AdminUser: ...
