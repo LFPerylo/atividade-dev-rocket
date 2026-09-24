@@ -93,6 +93,10 @@ class SeedReport:
     inserted: dict[str, int] = field(default_factory=dict)
 
 
+def _unchanged(value: str | None) -> str | None:
+    return value
+
+
 def _batches(rows: Iterable[dict[str, Any]], size: int) -> Iterator[list[dict[str, Any]]]:
     iterator = iter(rows)
     while batch := list(islice(iterator, size)):
@@ -180,6 +184,6 @@ class SeedLoader:
     @staticmethod
     def _convert(row: dict[str, str | None], source: TableSource) -> dict[str, Any]:
         return {
-            column: source.converters.get(column, lambda value: value)(value)
+            column: source.converters.get(column, _unchanged)(value)
             for column, value in row.items()
         }

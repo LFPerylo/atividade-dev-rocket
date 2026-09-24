@@ -1,7 +1,7 @@
 import pytest
 
 from app.movies.domain.errors import InvalidQuery
-from app.movies.domain.queries import MovieFilters, Page, PageRequest
+from app.movies.domain.queries import MovieFilters, Page, PageRequest, SortField, SortOrder
 
 
 def test_page_request_computes_offset() -> None:
@@ -34,3 +34,9 @@ def test_movie_filters_strip_blank_search_term() -> None:
 def test_movie_filters_reject_min_stars_outside_scale() -> None:
     with pytest.raises(InvalidQuery):
         MovieFilters(min_stars=6)
+
+
+def test_movie_filters_default_to_most_popular_first() -> None:
+    filters = MovieFilters()
+
+    assert (filters.sort, filters.order) == (SortField.POPULARITY, SortOrder.DESC)

@@ -55,8 +55,8 @@ class MovieFilters:
     year_from: int | None = None
     year_to: int | None = None
     min_stars: float | None = None
-    sort: SortField = SortField.TITLE
-    order: SortOrder = SortOrder.ASC
+    sort: SortField = SortField.POPULARITY
+    order: SortOrder = SortOrder.DESC
 
     def __post_init__(self) -> None:
         normalized_search = self.search.strip() if self.search else None
