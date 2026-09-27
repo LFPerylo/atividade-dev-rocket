@@ -14,7 +14,7 @@ SAMPLE_FILES = {
     "dim_movies.csv.gz": (
         "sk_movie_id,id_filme,titulo,data_lancamento,ano_lancamento,duracao_minutos,"
         "status_filme,sinopse,url_poster,url_backdrop\n"
-        'm-cdd,598,Cidade de Deus,2002-08-30,2002,130,Lançado,"""Buscapé"" cresce.",,\n'
+        'm-cdd,598,Cidade de Deus,2002-08-30,2002,130,Lançado,"""Buscapé"" ""cresce"".""",,\n'
         "m-blind,1,Ensaio sobre a Cegueira,2008-09-12,2008,0,Lançado,,,\n"
     ),
     "bridge_movie_genre.csv.gz": (
@@ -29,6 +29,11 @@ SAMPLE_FILES = {
         "sk_movie_id,orcamento_usd,receita_usd,lucro_usd,orcamento_brl,receita_brl,lucro_brl,"
         "popularidade,nota_tmdb,qtd_tmdb,nota_imdb,qtd_imdb\n"
         "m-cdd,3300000.0,30641770.0,27341770.0,,,0.0,40.5,8.4,7000.0,8.6,800000.0\n"
+    ),
+    "dim_reviews.csv.gz": (
+        "sk_review_id,sk_movie_id,qtd_avaliacoes_usuarios,nota_media_usuarios\n"
+        "m-cdd,m-cdd,2,9.0\n"
+        "m-blind,m-blind,0,\n"
     ),
     "movies_reviews.csv.gz": (
         "sk_movie_review_id,sk_movie_id,nome,nota,comentario\n"

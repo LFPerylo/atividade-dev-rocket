@@ -27,7 +27,7 @@ async def test_list_movies_returns_paginated_summaries(client: httpx.AsyncClient
         "ano_lancamento": 2002,
         "url_poster": None,
         "generos": [{"id": "g-crime", "nome": "Crime"}, {"id": "g-drama", "nome": "Drama"}],
-        "diretores": ["Fernando Meirelles", 'Kátia "K" Lund'],
+        "diretores": ["Fernando Meirelles", 'Kátia ""K"" Lund', 'Kátia ""K"" Lund"'],
         "media_estrelas": 4.5,
         "total_avaliacoes": 2,
     }
@@ -66,8 +66,8 @@ async def test_get_movie_returns_details(client: httpx.AsyncClient) -> None:
 
     assert response.status_code == 200
     body = response.json()
-    assert body["sinopse"] == '"Buscapé" cresce.'
-    assert body["diretores"] == ["Fernando Meirelles", 'Kátia "K" Lund']
+    assert body["sinopse"] == '"Buscapé" "cresce"."'
+    assert body["diretores"] == ["Fernando Meirelles", 'Kátia ""K"" Lund', 'Kátia ""K"" Lund"']
     assert body["produtoras"] == ["O2 Filmes"]
     assert body["desempenho"]["nota_imdb"] == 8.6
     assert (body["media_estrelas"], body["total_avaliacoes"]) == (4.5, 2)
@@ -105,7 +105,7 @@ async def test_create_movie_returns_created_details(
         {"titulo": " "},
         {"generos": ["g-inexistente"]},
         {"ano_lancamento": 1500},
-        {"duracao_minutos": 0},
+        {"duracao_minutos": -1},
     ],
 )
 async def test_create_movie_rejects_invalid_data(

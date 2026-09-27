@@ -22,44 +22,52 @@ def count(engine: Engine, table: str) -> int:
         return connection.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar_one()
 
 
+def rows(engine: Engine, sql: str) -> list[tuple[object, ...]]:
+    with engine.connect() as connection:
+        return [tuple(row) for row in connection.execute(text(sql)).all()]
+
+
 def test_load_inserts_every_table(loader: SeedLoader, sync_engine: Engine) -> None:
     report = loader.load()
 
     assert report.skipped is False
     assert report.inserted["dim_movies"] == 2
-    assert count(sync_engine, "bridge_movie_person") == 5
+    assert report.inserted["dim_reviews"] == 2
+    assert count(sync_engine, "bridge_movie_person") == 6
     assert count(sync_engine, "movie_reviews") == 3
     assert count(sync_engine, "fact_movies_performance") == 1
 
 
-def test_load_recomputes_rating_summaries_from_reviews(
+def test_load_keeps_rating_summaries_exactly_as_provided(
     loader: SeedLoader, sync_engine: Engine
 ) -> None:
     loader.load()
 
-    with sync_engine.connect() as connection:
-        rows = connection.execute(
-            text(
-                "SELECT sk_movie_id, qtd_avaliacoes_usuarios, nota_media_usuarios "
-                "FROM dim_reviews ORDER BY sk_movie_id"
-            )
-        ).all()
-    assert [tuple(row) for row in rows] == [("m-blind", 1, 6.0), ("m-cdd", 2, 9.0)]
+    assert rows(
+        sync_engine,
+        "SELECT sk_movie_id, qtd_avaliacoes_usuarios, nota_media_usuarios "
+        "FROM dim_reviews ORDER BY sk_movie_id",
+    ) == [("m-blind", 0, None), ("m-cdd", 2, 9.0)]
 
 
-def test_load_normalizes_values(loader: SeedLoader, sync_engine: Engine) -> None:
+def test_load_keeps_text_and_numbers_as_provided(loader: SeedLoader, sync_engine: Engine) -> None:
     loader.load()
 
-    with sync_engine.connect() as connection:
-        synopsis, runtime = connection.execute(
-            text("SELECT sinopse, duracao_minutos FROM dim_movies WHERE sk_movie_id = 'm-cdd'")
-        ).one()
-        blind_runtime = connection.execute(
-            text("SELECT duracao_minutos FROM dim_movies WHERE sk_movie_id = 'm-blind'")
-        ).scalar_one()
-    assert synopsis == '"Buscapé" cresce.'
-    assert runtime == 130
-    assert blind_runtime is None
+    assert rows(
+        sync_engine, "SELECT sk_movie_id, sinopse, duracao_minutos FROM dim_movies ORDER BY 1"
+    ) == [("m-blind", None, 0), ("m-cdd", '"Buscapé" "cresce"."', 130)]
+
+
+def test_load_keeps_people_that_only_differ_by_quotes(
+    loader: SeedLoader, sync_engine: Engine
+) -> None:
+    loader.load()
+
+    assert rows(
+        sync_engine,
+        "SELECT sk_person_id, nome_pessoa FROM dim_people "
+        "WHERE sk_person_id LIKE 'p-kl%' ORDER BY 1",
+    ) == [("p-kl", 'Kátia ""K"" Lund'), ("p-kl-dup", 'Kátia ""K"" Lund"')]
 
 
 def test_load_is_skipped_when_catalog_already_has_movies(
@@ -83,29 +91,3 @@ def test_load_with_reset_replaces_existing_data(loader: SeedLoader, sync_engine:
     assert report.skipped is False
     assert count(sync_engine, "movie_reviews") == 3
     assert count(sync_engine, "dim_movies") == 2
-
-
-def test_load_merges_people_duplicated_after_normalization(
-    loader: SeedLoader, sync_engine: Engine
-) -> None:
-    loader.load()
-
-    with sync_engine.connect() as connection:
-        people = connection.execute(
-            text("SELECT sk_person_id, nome_pessoa FROM dim_people WHERE tipo_pessoa = 'Diretor'")
-        ).all()
-        credited_movies = (
-            connection.execute(
-                text(
-                    "SELECT sk_movie_id FROM bridge_movie_person "
-                    "WHERE sk_person_id = 'p-kl' ORDER BY sk_movie_id"
-                )
-            )
-            .scalars()
-            .all()
-        )
-    assert sorted(tuple(row) for row in people) == [
-        ("p-fm", "Fernando Meirelles"),
-        ("p-kl", 'Kátia "K" Lund'),
-    ]
-    assert credited_movies == ["m-blind", "m-cdd"]

@@ -38,7 +38,7 @@ async def test_search_summary_includes_genres_directors_and_rating(
     assert movie.title == "Cidade de Deus"
     assert movie.release_year == 2002
     assert [genre.name for genre in movie.genres] == ["Crime", "Drama"]
-    assert movie.directors == ("Fernando Meirelles", 'Kátia "K" Lund')
+    assert movie.directors == ("Fernando Meirelles", 'Kátia ""K"" Lund', 'Kátia ""K"" Lund"')
     assert (movie.rating.count, movie.rating.average_stars) == (2, 4.5)
 
 
@@ -78,7 +78,7 @@ async def test_search_filters_by_minimum_stars(repository: SqlAlchemyMovieReposi
     [
         (SortField.TITLE, SortOrder.ASC, ["Cidade de Deus", "Ensaio sobre a Cegueira"]),
         (SortField.YEAR, SortOrder.DESC, ["Ensaio sobre a Cegueira", "Cidade de Deus"]),
-        (SortField.RATING, SortOrder.ASC, ["Ensaio sobre a Cegueira", "Cidade de Deus"]),
+        (SortField.RATING, SortOrder.ASC, ["Cidade de Deus", "Ensaio sobre a Cegueira"]),
         (SortField.POPULARITY, SortOrder.ASC, ["Cidade de Deus", "Ensaio sobre a Cegueira"]),
     ],
 )
@@ -98,11 +98,12 @@ async def test_get_returns_full_details(repository: SqlAlchemyMovieRepository) -
     assert movie.external_id == "598"
     assert movie.release_date == date(2002, 8, 30)
     assert movie.runtime_minutes == 130
-    assert movie.synopsis == '"Buscapé" cresce.'
+    assert movie.synopsis == '"Buscapé" "cresce"."'
     assert movie.companies == ("O2 Filmes",)
     assert [p.name for p in movie.people_with_role(PersonRole.DIRECTOR)] == [
         "Fernando Meirelles",
-        'Kátia "K" Lund',
+        'Kátia ""K"" Lund',
+        'Kátia ""K"" Lund"',
     ]
     assert movie.performance is not None
     assert movie.performance.imdb_score == 8.6
@@ -145,7 +146,7 @@ async def test_add_creates_movie_reusing_existing_directors(
     directors = await session.scalar(
         select(func.count()).select_from(DimPerson).where(DimPerson.tipo_pessoa == "Diretor")
     )
-    assert directors == 3
+    assert directors == 4
 
 
 async def test_update_replaces_fields_genres_and_directors_keeping_cast(

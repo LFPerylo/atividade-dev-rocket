@@ -6,13 +6,12 @@ from pathlib import Path
 import pytest
 
 from app.movies.infrastructure.seed.csv_reader import (
-    clean_text,
+    blank_to_none,
     read_csv,
     to_date,
     to_decimal,
     to_float,
     to_int,
-    to_positive_int,
 )
 
 
@@ -20,30 +19,22 @@ from app.movies.infrastructure.seed.csv_reader import (
     ("raw", "expected"),
     [
         ("", None),
-        ("   ", None),
         ("Rings", "Rings"),
-        ('"A ""movie within the movie"" appears."', 'A "movie within the movie" appears.'),
-        ('"Truncated ""quote', 'Truncated "quote'),
-        ('"Buscapé" cresce.', '"Buscapé" cresce.'),
+        ('"A ""movie within the movie"" appears."', '"A ""movie within the movie"" appears."'),
+        (" com espaços ", " com espaços "),
     ],
 )
-def test_clean_text_normalizes_blank_and_double_encoded_quotes(
-    raw: str, expected: str | None
-) -> None:
-    assert clean_text(raw) == expected
+def test_blank_to_none_keeps_every_value_except_empty_cells(raw: str, expected: str | None) -> None:
+    assert blank_to_none(raw) == expected
 
 
 def test_numeric_converters_accept_float_notation_and_blank() -> None:
     assert to_int("2375.0") == 2375
+    assert to_int("0") == 0
     assert to_int("") is None
     assert to_float("7.064") == 7.064
     assert to_decimal("25000000.0") == Decimal("25000000.0")
     assert to_decimal("") is None
-
-
-def test_to_positive_int_treats_zero_as_unknown() -> None:
-    assert to_positive_int("0") is None
-    assert to_positive_int("102") == 102
 
 
 def test_to_date_parses_iso_dates() -> None:
@@ -51,12 +42,13 @@ def test_to_date_parses_iso_dates() -> None:
     assert to_date("") is None
 
 
-def test_read_csv_reads_gzip_rows_with_clean_values(tmp_path: Path) -> None:
+def test_read_csv_reads_gzip_rows_as_provided(tmp_path: Path) -> None:
     path = tmp_path / "dim_genres.csv.gz"
     with gzip.open(path, "wt", encoding="utf-8") as file:
-        file.write("nome_genero,sk_genre_id\nHorror,g1\n,g2\n")
+        file.write('nome_genero,sk_genre_id\nHorror,g1\n,g2\n"Tv ""Movie""",g3\n')
 
     assert list(read_csv(path)) == [
         {"nome_genero": "Horror", "sk_genre_id": "g1"},
         {"nome_genero": None, "sk_genre_id": "g2"},
+        {"nome_genero": 'Tv "Movie"', "sk_genre_id": "g3"},
     ]

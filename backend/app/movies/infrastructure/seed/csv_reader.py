@@ -6,29 +6,13 @@ from decimal import Decimal
 from pathlib import Path
 from typing import IO
 
-QUOTE = '"'
-ESCAPED_QUOTE = '""'
 
-
-def clean_text(raw: str) -> str | None:
-    value = raw.strip()
-    if ESCAPED_QUOTE in value:
-        value = _decode_double_encoded(value)
-    return value or None
-
-
-def _decode_double_encoded(value: str) -> str:
-    unwrapped = value.removeprefix(QUOTE).removesuffix(QUOTE)
-    return unwrapped.replace(ESCAPED_QUOTE, QUOTE).strip()
+def blank_to_none(raw: str) -> str | None:
+    return raw or None
 
 
 def to_int(raw: str | None) -> int | None:
     return int(float(raw)) if raw else None
-
-
-def to_positive_int(raw: str | None) -> int | None:
-    value = to_int(raw)
-    return value if value else None
 
 
 def to_float(raw: str | None) -> float | None:
@@ -52,4 +36,4 @@ def _open(path: Path) -> IO[str]:
 def read_csv(path: Path) -> Iterator[dict[str, str | None]]:
     with _open(path) as file:
         for row in csv.DictReader(file):
-            yield {column: clean_text(value or "") for column, value in row.items()}
+            yield {column: blank_to_none(value or "") for column, value in row.items()}
