@@ -14,7 +14,7 @@ Decisões já tomadas com o usuário:
 - **Commits**: mensagens em português (Conventional Commits, ex. `feat: adiciona caso de uso de cadastro de filme`), **sem** linha `Co-Authored-By` (instrução do usuário prevalece).
 - Skills superpowers e code-review já estão instaladas — nada a instalar.
 
-Achado de dados: `dim_reviews.csv` está inconsistente (26.604 resumos vs 40.267 filmes com avaliações; ~30% de médias divergentes). `movie_reviews` é a fonte da verdade; `dim_reviews` passa a ser um resumo denormalizado **recalculado** no seed e **atualizado na mesma transação** a cada nova avaliação (permite ordenar por média sem agregar 95k filmes por request).
+Dados como gabarito (orientação recebida em 2026-09-27): os CSVs são carregados sem tratamento. `dim_reviews.csv` é a média oficial; cada nova avaliação atualiza o resumo de forma incremental na mesma transação (`(média × qtd + nota) / (qtd + 1)`), sem recálculo a partir de `movie_reviews`.
 
 ## Arquitetura
 
@@ -32,7 +32,7 @@ app/
                    list_movies, add_review, list_reviews, list_genres), commands.py (DTOs de entrada)
     infrastructure/ sqlalchemy_movie_repository.py, sqlalchemy_review_repository.py,
                    sqlalchemy_genre_repository.py, mappers.py, unit_of_work.py
-    seed/          csv_reader.py (gzip + normalização), loader.py (bulk insert em lotes, sync engine)
+    seed/          csv_reader.py (gzip; vazio → nulo), loader.py (bulk insert em lotes, sync engine)
   auth/
     domain/ (AdminUser, errors, ports: PasswordHasher, TokenService, AdminRepository)
     application/ (authenticate_admin, create_admin)
@@ -84,8 +84,8 @@ UI escura estilo Letterboxd, responsiva (mobile-first), estado da busca/filtros/
 
 ### Dados / Seed
 - `backend/data/seed/*.csv.gz` (gerados a partir das pastas `bases_*`, que saem do repositório e entram no `.gitignore`).
-- Ordem: genres → companies → people → movies → bridges → performance → movie_reviews → recálculo de `dim_reviews` via `INSERT … SELECT AVG/COUNT`. Lotes de ~5.000 linhas, uma transação, `PRAGMA` de performance durante a carga. Idempotente: pula se `dim_movies` já tem dados; `--reset` limpa antes.
-- Normalização testada: strings vazias → `None`, datas ISO, floats/ints, aspas espúrias em sinopse; duplicatas tratadas conforme verificação no TDD.
+- Ordem: genres → companies → people → movies → bridges → performance → movie_reviews → dim_reviews, todos exatamente como no CSV. Lotes de ~5.000 linhas, uma transação, `PRAGMA` de performance durante a carga. Idempotente: pula se `dim_movies` já tem dados; `--reset` limpa antes.
+- Apenas conversão de tipos: células vazias → `None`, datas ISO, floats/ints. Textos, durações `0` e nomes quase duplicados são preservados.
 
 ### DevOps
 - `backend/Dockerfile` (python 3.12-slim + uv; entrypoint: `alembic upgrade head` → seed se vazio → uvicorn), `frontend/Dockerfile` (build Node → nginx servindo SPA + proxy `/api`), `docker-compose.yml` (volume para o SQLite, healthchecks).
@@ -101,7 +101,7 @@ UI escura estilo Letterboxd, responsiva (mobile-first), estado da busca/filtros/
 
 - `make test` → pytest (unit + integração + API) e vitest verdes; cobertura reportada.
 - `make lint` → ruff, mypy, eslint, tsc sem erros.
-- `make seed` num banco limpo: contagens batem com os CSVs (95.645 filmes, 43.666 avaliações) e `dim_reviews` = agregado de `movie_reviews`.
+- `make seed` num banco limpo: contagens batem com os CSVs (95.645 filmes, 43.666 avaliações) e `dim_reviews` com as 26.604 linhas do CSV.
 - `docker compose up --build` → frontend em `http://localhost:8080`, API em `/api/v1`, `/docs` funcional.
 - Validação manual no navegador (browser pane): login, busca, filtros, paginação, detalhes, avaliar (média atualiza), criar/editar/remover filme, layout mobile.
 - `npx playwright test` cobrindo os fluxos acima; `npm run build-storybook` ok.

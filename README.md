@@ -162,12 +162,13 @@ Documentação interativa em `http://localhost:8000/docs`.
 - **Escala de notas.** Os dados trazem notas de 0 a 10; o requisito pede 1 a 5 estrelas. O banco continua em
   0–10 e a interface trabalha com meias estrelas (1; 1,5; …; 5), com `nota = estrelas × 2`. Avaliações
   históricas aparecem convertidas (9,8 → 4,9★).
-- **Média das avaliações.** O `dim_reviews.csv` recebido estava inconsistente (26.604 resumos para 40.267 filmes
-  avaliados e cerca de 30% de médias divergentes). `movie_reviews` é a fonte da verdade: o seed recalcula
-  `dim_reviews` e cada nova avaliação atualiza o resumo na mesma transação, o que permite ordenar e filtrar por
-  média sem agregar 95 mil filmes a cada requisição.
-- **Qualidade dos dados.** A carga normaliza campos vazios, sinopses com aspas duplamente escapadas e duração
-  zero, além de mesclar pessoas e produtoras que viram duplicatas após a normalização, remapeando as tabelas ponte.
+- **Dados como gabarito.** Os CSVs são a referência oficial e são carregados exatamente como vieram: a carga
+  só converte células vazias em nulo e textos em datas/números. Nomes, sinopses, durações `0` e o resumo
+  `dim_reviews.csv` são preservados, e as contagens do banco batem linha a linha com os arquivos.
+- **Média das avaliações.** A média exibida vem de `dim_reviews` (gabarito). Cada avaliação publicada pelo
+  administrador entra nesse resumo de forma incremental, na mesma transação:
+  `nova média = (média × quantidade + nota) ÷ (quantidade + 1)`. Um filme sem resumo começa pela própria nota.
+  Assim o gabarito nunca é sobrescrito por recálculo, e ordenar ou filtrar por média não exige agregar 95 mil filmes.
 - **Dados versionados.** Os CSVs (~222 MB) ficam compactados em `backend/data/seed/*.csv.gz` (~115 MB), abaixo do
   limite de arquivo do GitHub, e o seed lê gzip diretamente.
 - **Segurança.** Senhas com argon2, JWT com expiração, login com tempo constante (não revela e-mails

@@ -40,5 +40,6 @@ docker compose up --build   # produto completo em http://localhost:8080
 ## Domínio
 
 - Notas são armazenadas de 0 a 10 (`movie_reviews.nota`). A interface usa estrelas de 1 a 5 em passos de 0,5: `nota = estrelas * 2`.
-- `movie_reviews` é a fonte da verdade. `dim_reviews` é um resumo (quantidade e média) recalculado no seed e atualizado na mesma transação de cada nova avaliação.
+- Os CSVs são o gabarito: a carga não trata os dados (só converte vazio em nulo e texto em data/número). Nada de normalizar, deduplicar ou recalcular.
+- A média exibida vem de `dim_reviews` (carregado do CSV). Nova avaliação atualiza o resumo de forma incremental na mesma transação: `(média × qtd + nota) / (qtd + 1)`.
 - Leitura é pública; criar, editar, remover filmes e avaliar exige token JWT de administrador.
