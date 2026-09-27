@@ -1,6 +1,7 @@
 from datetime import UTC
 
 import pytest
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.movies.domain.entities import MovieDraft, NewReview
@@ -8,6 +9,7 @@ from app.movies.domain.queries import PageRequest
 from app.movies.domain.rating import Stars
 from app.movies.infrastructure.movie_repository import SqlAlchemyMovieRepository
 from app.movies.infrastructure.review_repository import SqlAlchemyReviewRepository
+from app.movies.models import DimReview
 
 
 @pytest.fixture
@@ -49,9 +51,14 @@ async def test_add_lists_newest_review_first(
     assert page.items[0].author == "Diego"
 
 
-async def test_add_refreshes_movie_rating_summary(
+async def test_add_updates_provided_summary_incrementally(
     repository: SqlAlchemyReviewRepository, session: AsyncSession
 ) -> None:
+    await session.execute(
+        update(DimReview)
+        .where(DimReview.sk_movie_id == "m-cdd")
+        .values(qtd_avaliacoes_usuarios=5, nota_media_usuarios=8.0)
+    )
     await repository.add(
         "m-cdd", NewReview(author="Diego", stars=Stars.from_value(1), comment="Não gostei.")
     )
@@ -60,8 +67,22 @@ async def test_add_refreshes_movie_rating_summary(
     movie = await SqlAlchemyMovieRepository(session).get("m-cdd")
 
     assert movie is not None
-    assert movie.rating.count == 3
-    assert movie.rating.average_score == pytest.approx(20 / 3)
+    assert movie.rating.count == 6
+    assert movie.rating.average_score == pytest.approx(7.0)
+
+
+async def test_add_starts_from_empty_provided_summary(
+    repository: SqlAlchemyReviewRepository, session: AsyncSession
+) -> None:
+    await repository.add(
+        "m-blind", NewReview(author="Diego", stars=Stars.from_value(3.5), comment="Tenso.")
+    )
+    await session.commit()
+
+    movie = await SqlAlchemyMovieRepository(session).get("m-blind")
+
+    assert movie is not None
+    assert (movie.rating.count, movie.rating.average_score) == (1, 7.0)
 
 
 async def test_add_creates_summary_for_movie_without_reviews(

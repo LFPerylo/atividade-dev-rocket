@@ -1,40 +1,22 @@
-from sqlalchemy import Delete, Insert, Select, delete, func, insert, literal_column, select
-from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+from sqlalchemy import Insert, func
+from sqlalchemy.dialects.sqlite import insert
 
-from app.movies.models import DimReview, MovieReview
-
-SUMMARY_COLUMNS = (
-    "sk_review_id",
-    "sk_movie_id",
-    "qtd_avaliacoes_usuarios",
-    "nota_media_usuarios",
-)
+from app.movies.models import DimReview
 
 
-def _aggregate_reviews() -> Select[tuple[str, str, int, float]]:
-    return select(
-        MovieReview.sk_movie_id,
-        MovieReview.sk_movie_id,
-        func.count(),
-        func.avg(MovieReview.nota),
-    ).group_by(MovieReview.sk_movie_id)
-
-
-def clear_all_summaries() -> Delete:
-    return delete(DimReview)
-
-
-def rebuild_all_summaries() -> Insert:
-    return insert(DimReview).from_select(SUMMARY_COLUMNS, _aggregate_reviews())
-
-
-def refresh_movie_summary(movie_id: str) -> Insert:
-    aggregate = _aggregate_reviews().where(MovieReview.sk_movie_id == movie_id)
-    statement = sqlite_insert(DimReview).from_select(SUMMARY_COLUMNS, aggregate)
+def add_score_to_summary(movie_id: str, score: float) -> Insert:
+    count = DimReview.qtd_avaliacoes_usuarios
+    average = func.coalesce(DimReview.nota_media_usuarios, 0)
+    statement = insert(DimReview).values(
+        sk_review_id=movie_id,
+        sk_movie_id=movie_id,
+        qtd_avaliacoes_usuarios=1,
+        nota_media_usuarios=score,
+    )
     return statement.on_conflict_do_update(
         index_elements=[DimReview.sk_movie_id],
         set_={
-            "qtd_avaliacoes_usuarios": literal_column("excluded.qtd_avaliacoes_usuarios"),
-            "nota_media_usuarios": literal_column("excluded.nota_media_usuarios"),
+            "qtd_avaliacoes_usuarios": count + 1,
+            "nota_media_usuarios": (average * count + score) / (count + 1),
         },
     )

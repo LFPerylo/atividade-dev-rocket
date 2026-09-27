@@ -25,7 +25,7 @@ async def test_add_review_updates_movie_average(
     assert response.status_code == 201
     assert (response.json()["estrelas"], response.json()["nota"]) == (3.5, 7.0)
     movie = (await client.get("/movies/m-blind")).json()
-    assert (movie["media_estrelas"], movie["total_avaliacoes"]) == (3.3, 2)
+    assert (movie["media_estrelas"], movie["total_avaliacoes"]) == (3.5, 1)
 
 
 @pytest.mark.parametrize(

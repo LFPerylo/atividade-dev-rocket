@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.movies.domain.entities import NewReview, Review
 from app.movies.domain.queries import Page, PageRequest
 from app.movies.infrastructure.mappers import to_review
-from app.movies.infrastructure.rating_summary import refresh_movie_summary
+from app.movies.infrastructure.rating_summary import add_score_to_summary
 from app.movies.models import MovieReview
 
 INSERTION_ORDER: ColumnClause[int] = literal_column("movie_reviews.rowid")
@@ -38,5 +38,5 @@ class SqlAlchemyReviewRepository:
         self._session.add(model)
         await self._session.flush()
         await self._session.refresh(model)
-        await self._session.execute(refresh_movie_summary(movie_id))
+        await self._session.execute(add_score_to_summary(movie_id, model.nota))
         return to_review(model)
