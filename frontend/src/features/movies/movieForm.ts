@@ -30,7 +30,7 @@ export const movieFormSchema = z
       `Ano entre ${MIN_YEAR} e ${MAX_YEAR}`,
     ),
     data_lancamento: z.string(),
-    duracao_minutos: optionalInteger((minutes) => minutes > 0, 'Duração deve ser positiva'),
+    duracao_minutos: optionalInteger((minutes) => minutes >= 0, 'Duração não pode ser negativa'),
     sinopse: z.string().max(4000, 'Máximo de 4000 caracteres'),
     url_poster: optionalUrl,
     url_backdrop: optionalUrl,

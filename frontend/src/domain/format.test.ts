@@ -12,6 +12,7 @@ describe('format', () => {
     [90, '1h 30min'],
     [45, '45min'],
     [120, '2h'],
+    [0, null],
     [null, null],
   ])('formats runtime %s as %s', (minutes, expected) => {
     expect(formatRuntime(minutes)).toBe(expected)

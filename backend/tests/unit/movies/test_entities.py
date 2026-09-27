@@ -48,6 +48,10 @@ def test_draft_rejects_implausible_year(year: int) -> None:
         make_draft(release_year=year)
 
 
+def test_draft_accepts_zero_runtime_as_in_source_data() -> None:
+    assert make_draft(runtime_minutes=0).runtime_minutes == 0
+
+
 def test_draft_rejects_negative_runtime() -> None:
     with pytest.raises(InvalidMovieData):
         make_draft(runtime_minutes=-5)

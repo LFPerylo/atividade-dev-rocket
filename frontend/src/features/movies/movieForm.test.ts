@@ -48,7 +48,7 @@ describe('movie form mapping', () => {
   it.each([
     [{ titulo: ' ' }, 'titulo', 'Informe o título'],
     [{ ano_lancamento: '1500' }, 'ano_lancamento', 'Ano entre 1870 e 2100'],
-    [{ duracao_minutos: '0' }, 'duracao_minutos', 'Duração deve ser positiva'],
+    [{ duracao_minutos: '-1' }, 'duracao_minutos', 'Duração não pode ser negativa'],
     [{ url_poster: 'não é url' }, 'url_poster', 'Informe uma URL válida'],
     [
       { ano_lancamento: '2001', data_lancamento: '2002-08-30' },

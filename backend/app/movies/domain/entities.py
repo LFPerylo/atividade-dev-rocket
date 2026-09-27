@@ -124,8 +124,8 @@ class MovieDraft:
         synopsis = _clean_text(self.synopsis)
         if synopsis and len(synopsis) > MAX_SYNOPSIS_LENGTH:
             raise InvalidMovieData(f"Sinopse deve ter no máximo {MAX_SYNOPSIS_LENGTH} caracteres")
-        if self.runtime_minutes is not None and self.runtime_minutes <= 0:
-            raise InvalidMovieData("Duração deve ser positiva")
+        if self.runtime_minutes is not None and self.runtime_minutes < 0:
+            raise InvalidMovieData("Duração não pode ser negativa")
         object.__setattr__(self, "title", title)
         object.__setattr__(self, "synopsis", synopsis)
         object.__setattr__(self, "directors", _unique_names(self.directors))

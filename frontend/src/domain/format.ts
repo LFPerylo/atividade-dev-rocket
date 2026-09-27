@@ -9,7 +9,7 @@ const compactFormatter = new Intl.NumberFormat('pt-BR', {
 const integerFormatter = new Intl.NumberFormat('pt-BR')
 
 export function formatRuntime(minutes: number | null): string | null {
-  if (minutes === null) return null
+  if (!minutes) return null
   const hours = Math.floor(minutes / MINUTES_PER_HOUR)
   const rest = minutes % MINUTES_PER_HOUR
   if (hours === 0) return `${rest}min`
