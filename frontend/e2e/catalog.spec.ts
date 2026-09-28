@@ -10,7 +10,7 @@ test('visitor searches the catalog and opens a movie', async ({ page }) => {
 
   await expect(page.getByRole('heading', { level: 1, name: 'Oppenheimer' })).toBeVisible()
   await expect(page.getByText('Christopher Nolan').first()).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Entre como administrador' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'crie uma conta' })).toBeVisible()
 })
 
 test('visitor filters by genre and sorts by title', async ({ page }) => {
@@ -27,5 +27,5 @@ test('protected pages redirect to login', async ({ page }) => {
   await page.goto('/filmes/novo')
 
   await expect(page).toHaveURL(/\/login\?next=%2Ffilmes%2Fnovo/)
-  await expect(page.getByRole('heading', { name: 'Área do administrador' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar' })).toBeVisible()
 })
