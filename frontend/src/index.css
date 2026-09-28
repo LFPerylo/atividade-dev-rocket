@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+
+  --color-ink-950: #0e1115;
+  --color-ink-900: #14181c;
+  --color-ink-800: #1c2228;
+  --color-ink-700: #2c3440;
+  --color-ink-600: #456;
+  --color-ink-400: #8a99a8;
+  --color-ink-200: #cbd5df;
+  --color-ink-100: #e8edf2;
+
+  --color-accent-500: #00c030;
+  --color-accent-400: #00e054;
+  --color-star-400: #ffb020;
+  --color-danger-500: #e5484d;
+  --color-danger-400: #ff6369;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-ink-900 font-sans text-ink-200 antialiased;
+    min-height: 100dvh;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent-400;
+  }
+
+  ::selection {
+    @apply bg-accent-500 text-ink-950;
+  }
+}

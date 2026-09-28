@@ -18,3 +18,17 @@ htmlcov/
 # Sistema operacional e IDE
 .DS_Store
 .vscode/
+
+# Dados brutos (versionados compactados em backend/data/seed)
+bases_atv_dev1/
+bases_atv_dev_2/
+
+# Frontend
+node_modules/
+dist/
+storybook-static/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.mypy_cache/

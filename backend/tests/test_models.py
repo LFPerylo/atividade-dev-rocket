@@ -1,9 +1,9 @@
-from app.db.base import Base
-from app.movies import models  # noqa: F401  Registra os modelos ORM.
+from app.db.registry import registered_metadata
 
 
 def test_movie_schema_registers_expected_tables() -> None:
     expected_tables = {
+        "admin_users",
         "bridge_movie_company",
         "bridge_movie_genre",
         "bridge_movie_person",
@@ -16,12 +16,12 @@ def test_movie_schema_registers_expected_tables() -> None:
         "movie_reviews",
     }
 
-    assert set(Base.metadata.tables) == expected_tables
-    assert "idioma_original" not in Base.metadata.tables["dim_movies"].columns
+    assert set(registered_metadata().tables) == expected_tables
+    assert "idioma_original" not in registered_metadata().tables["dim_movies"].columns
 
 
 def test_movie_review_columns_match_shared_csv() -> None:
-    table = Base.metadata.tables["movie_reviews"]
+    table = registered_metadata().tables["movie_reviews"]
 
     assert {"sk_movie_review_id", "sk_movie_id", "nome", "nota", "comentario"} <= set(
         table.columns.keys()
