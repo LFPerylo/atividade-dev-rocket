@@ -7,8 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.auth.application.use_cases import EnsureAdmin
-from app.auth.infrastructure.admin_repository import SqlAlchemyAdminRepository
 from app.auth.infrastructure.password_hasher import Argon2PasswordHasher
+from app.auth.infrastructure.user_repository import SqlAlchemyUserRepository
 from app.db.session import get_db
 from app.db.transaction import SqlAlchemyTransactionManager
 from app.main import create_app
@@ -17,6 +17,7 @@ from tests.integration.seed.sample_data import write_sample_data
 
 ADMIN_EMAIL = "admin@rocketlab.dev"
 ADMIN_PASSWORD = "s3nha-forte"
+REVIEWER = {"nome": "Bia Lima", "email": "bia@exemplo.com", "senha": "senha-da-bia"}
 
 
 @pytest.fixture
@@ -33,7 +34,7 @@ async def client(
 ) -> AsyncIterator[httpx.AsyncClient]:
     async with session_factory() as session:
         await EnsureAdmin(
-            SqlAlchemyAdminRepository(session),
+            SqlAlchemyUserRepository(session),
             Argon2PasswordHasher(),
             SqlAlchemyTransactionManager(session),
         ).execute(email=ADMIN_EMAIL, name="Admin", password=ADMIN_PASSWORD)
@@ -49,9 +50,19 @@ async def client(
         yield http
 
 
+def bearer(token: str) -> dict[str, str]:
+    return {"Authorization": f"Bearer {token}"}
+
+
 @pytest.fixture
 async def auth_headers(client: httpx.AsyncClient) -> dict[str, str]:
     response = await client.post(
         "/auth/login", json={"email": ADMIN_EMAIL, "senha": ADMIN_PASSWORD}
     )
-    return {"Authorization": f"Bearer {response.json()['access_token']}"}
+    return bearer(response.json()["access_token"])
+
+
+@pytest.fixture
+async def reviewer_headers(client: httpx.AsyncClient) -> dict[str, str]:
+    response = await client.post("/auth/register", json=REVIEWER)
+    return bearer(response.json()["access_token"])

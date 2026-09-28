@@ -3,10 +3,11 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.domain.entities import Role
 from app.auth.domain.errors import InvalidToken
-from app.auth.infrastructure.admin_repository import SqlAlchemyAdminRepository
 from app.auth.infrastructure.jwt_token_service import JwtTokenService
 from app.auth.infrastructure.password_hasher import Argon2PasswordHasher
+from app.auth.infrastructure.user_repository import SqlAlchemyUserRepository
 
 SECRET = "segredo-de-teste-com-tamanho-suficiente-32"
 
@@ -47,12 +48,13 @@ def test_jwt_rejects_token_signed_with_other_secret() -> None:
         JwtTokenService(secret=SECRET, expires_minutes=5).subject_of(token.issue("a").value)
 
 
-async def test_admin_repository_adds_and_finds_admin(session: AsyncSession) -> None:
-    repository = SqlAlchemyAdminRepository(session)
+async def test_user_repository_adds_and_finds_users_with_role(session: AsyncSession) -> None:
+    repository = SqlAlchemyUserRepository(session)
 
-    created = await repository.add("admin@rocketlab.dev", "Admin", "hash")
+    created = await repository.add("ana@exemplo.com", "Ana", "hash", Role.REVIEWER)
     await session.commit()
 
-    assert await repository.find_by_email("admin@rocketlab.dev") == created
+    assert created.role is Role.REVIEWER
+    assert await repository.find_by_email("ana@exemplo.com") == created
     assert await repository.get(created.id) == created
     assert await repository.get("inexistente") is None

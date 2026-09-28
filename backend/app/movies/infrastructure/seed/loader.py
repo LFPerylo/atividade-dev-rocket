@@ -109,7 +109,7 @@ class SeedLoader:
 
     def _clear(self, connection: Connection) -> None:
         for table in reversed(Base.metadata.sorted_tables):
-            if table.name != "admin_users":
+            if table.name != "users":
                 connection.execute(delete(table))
 
     def _load_source(self, connection: Connection, source: TableSource) -> int:

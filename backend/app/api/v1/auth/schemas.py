@@ -1,9 +1,15 @@
 from pydantic import BaseModel, Field
 
-from app.auth.domain.entities import AccessToken, AdminUser
+from app.auth.domain.entities import AccessToken, User
 
 
 class LoginIn(BaseModel):
+    email: str = Field(max_length=255)
+    senha: str = Field(max_length=255)
+
+
+class RegisterIn(BaseModel):
+    nome: str = Field(max_length=255)
     email: str = Field(max_length=255)
     senha: str = Field(max_length=255)
 
@@ -18,11 +24,12 @@ class TokenOut(BaseModel):
         return cls(access_token=token.value, expires_in=token.expires_in_seconds)
 
 
-class AdminOut(BaseModel):
+class UserOut(BaseModel):
     id: str
     email: str
     nome: str
+    papel: str
 
     @classmethod
-    def from_admin(cls, admin: AdminUser) -> "AdminOut":
-        return cls(id=admin.id, email=admin.email, nome=admin.name)
+    def from_user(cls, user: User) -> "UserOut":
+        return cls(id=user.id, email=user.email, nome=user.name, papel=user.role.value)

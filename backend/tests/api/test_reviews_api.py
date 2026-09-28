@@ -1,7 +1,7 @@
 import httpx
 import pytest
 
-REVIEW = {"nome": "Diego", "estrelas": 3.5, "comentario": "Tenso e bem filmado."}
+REVIEW = {"estrelas": 3.5, "comentario": "Tenso e bem filmado."}
 
 
 async def test_list_reviews_returns_paginated_reviews(client: httpx.AsyncClient) -> None:
@@ -28,9 +28,7 @@ async def test_add_review_updates_movie_average(
     assert (movie["media_estrelas"], movie["total_avaliacoes"]) == (3.5, 1)
 
 
-@pytest.mark.parametrize(
-    "overrides", [{"estrelas": 0.5}, {"estrelas": 4.2}, {"nome": " "}, {"comentario": ""}]
-)
+@pytest.mark.parametrize("overrides", [{"estrelas": 0.5}, {"estrelas": 4.2}, {"comentario": ""}])
 async def test_add_review_rejects_invalid_data(
     client: httpx.AsyncClient, auth_headers: dict[str, str], overrides: dict[str, object]
 ) -> None:
@@ -51,3 +49,14 @@ async def test_add_review_returns_404_for_unknown_movie(
     response = await client.post("/movies/x/reviews", json=REVIEW, headers=auth_headers)
 
     assert response.status_code == 404
+
+
+async def test_reviewer_publishes_review_under_account_name(
+    client: httpx.AsyncClient, reviewer_headers: dict[str, str]
+) -> None:
+    response = await client.post(
+        "/movies/m-cdd/reviews", json=REVIEW | {"nome": "Outro Nome"}, headers=reviewer_headers
+    )
+
+    assert response.status_code == 201
+    assert response.json()["nome"] == "Bia Lima"

@@ -34,6 +34,7 @@ class SqlAlchemyReviewRepository:
             nome=review.author,
             nota=review.stars.to_score(),
             comentario=review.comment,
+            sk_user_id=review.author_id,
         )
         self._session.add(model)
         await self._session.flush()

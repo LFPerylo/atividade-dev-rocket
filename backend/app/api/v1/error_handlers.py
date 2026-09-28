@@ -3,9 +3,11 @@ from fastapi.responses import JSONResponse
 
 from app.auth.domain.errors import (
     AuthError,
-    InvalidAdminData,
+    EmailAlreadyRegistered,
     InvalidCredentials,
     InvalidToken,
+    InvalidUserData,
+    PermissionDenied,
 )
 from app.movies.domain.errors import DomainError, MovieNotFound
 
@@ -17,7 +19,11 @@ def _status_for(error: Exception) -> int:
         return status.HTTP_404_NOT_FOUND
     if isinstance(error, UNAUTHORIZED_ERRORS):
         return status.HTTP_401_UNAUTHORIZED
-    if isinstance(error, InvalidAdminData | DomainError):
+    if isinstance(error, PermissionDenied):
+        return status.HTTP_403_FORBIDDEN
+    if isinstance(error, EmailAlreadyRegistered):
+        return status.HTTP_409_CONFLICT
+    if isinstance(error, InvalidUserData | DomainError):
         return status.HTTP_422_UNPROCESSABLE_CONTENT
     return status.HTTP_400_BAD_REQUEST
 
