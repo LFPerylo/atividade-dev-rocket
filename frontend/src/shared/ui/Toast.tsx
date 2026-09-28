@@ -36,7 +36,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <p
             key={message.id}
             className={clsx(
-              'rounded-lg px-4 py-3 text-sm font-medium shadow-xl',
+              'rounded-lg px-4 py-3 text-sm font-medium shadow-lg shadow-ink-950/60',
+              'transition-[opacity,transform] duration-200 ease-out starting:opacity-0 motion-safe:starting:translate-y-2',
               message.tone === 'success'
                 ? 'bg-accent-500 text-ink-950'
                 : 'bg-danger-500 text-white',

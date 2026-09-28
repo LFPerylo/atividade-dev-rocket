@@ -22,10 +22,10 @@ com resenhas.
 | Detalhes do filme com avaliações | `/filmes/:id` → `GET /api/v1/movies/{id}` e `/reviews` |
 | Barra de pesquisa | Busca por título **ou diretor**, com debounce e estado na URL |
 | Atualizar e remover filmes | Botões `Editar` / `Remover` (com confirmação) nos detalhes |
-| Nova avaliação (1–5 estrelas + resenha) | Formulário com meias estrelas nos detalhes |
+| Nova avaliação (1–5 estrelas + resenha) | Formulário com meias estrelas nos detalhes, para qualquer usuário logado |
 | Média das avaliações | Exibida em cada card e no resumo da página de detalhes |
 
-Extras: autenticação do administrador (JWT), filtros por gênero, ano e nota mínima, ordenação por popularidade,
+Extras: cadastro de usuários avaliadores (`/cadastro`), autenticação JWT com papéis (administrador e avaliador), filtros por gênero, ano e nota mínima, ordenação por popularidade,
 média, título ou ano, layout responsivo, cache de consultas no cliente (TanStack Query), Storybook, testes
 automatizados (unitários, integração, API, componentes e E2E), Docker e CI.
 
@@ -73,9 +73,10 @@ npm run dev
 
 </details>
 
-### Acesso de administrador
+### Contas e papéis
 
-Leitura é pública. Para cadastrar, editar, remover e avaliar, clique em **Entrar**:
+Leitura é pública. Qualquer pessoa pode **Criar conta** e passa a avaliar filmes em seu nome (papel
+`avaliador`). Cadastrar, editar e remover filmes é exclusivo do papel `admin`. O administrador inicial é:
 
 - E-mail: `admin@rocketlab.dev`
 - Senha: `rocketlab2026`
@@ -147,14 +148,15 @@ Documentação interativa em `http://localhost:8000/docs`.
 | Método | Rota | Autenticação |
 |---|---|---|
 | `POST` | `/api/v1/auth/login` | – |
+| `POST` | `/api/v1/auth/register` | – |
 | `GET` | `/api/v1/auth/me` | Bearer |
 | `GET` | `/api/v1/movies?pagina&tamanho&busca&genero&ano_de&ano_ate&estrelas_min&ordenar&ordem` | – |
 | `GET` | `/api/v1/movies/{id}` | – |
-| `POST` | `/api/v1/movies` | Bearer |
-| `PUT` | `/api/v1/movies/{id}` | Bearer |
-| `DELETE` | `/api/v1/movies/{id}` | Bearer |
+| `POST` | `/api/v1/movies` | Bearer (admin) |
+| `PUT` | `/api/v1/movies/{id}` | Bearer (admin) |
+| `DELETE` | `/api/v1/movies/{id}` | Bearer (admin) |
 | `GET` | `/api/v1/movies/{id}/reviews?pagina&tamanho` | – |
-| `POST` | `/api/v1/movies/{id}/reviews` | Bearer |
+| `POST` | `/api/v1/movies/{id}/reviews` | Bearer (qualquer papel) |
 | `GET` | `/api/v1/genres` | – |
 
 ## Decisões de projeto
@@ -171,5 +173,11 @@ Documentação interativa em `http://localhost:8000/docs`.
   Assim o gabarito nunca é sobrescrito por recálculo, e ordenar ou filtrar por média não exige agregar 95 mil filmes.
 - **Dados versionados.** Os CSVs (~222 MB) ficam compactados em `backend/data/seed/*.csv.gz` (~115 MB), abaixo do
   limite de arquivo do GitHub, e o seed lê gzip diretamente.
+- **Papéis.** A tabela `users` guarda o papel (`admin` ou `avaliador`). Avaliações novas são ligadas ao autor
+  (`movie_reviews.sk_user_id`) e usam o nome da conta. As avaliações do gabarito continuam sem usuário.
 - **Segurança.** Senhas com argon2, JWT com expiração, login com tempo constante (não revela e-mails
-  cadastrados), escrita restrita ao administrador e busca com curingas do `LIKE` escapados.
+  cadastrados), gestão do catálogo restrita ao admin (403 para avaliadores) e busca com curingas do `LIKE`
+  escapados.
+- **Design.** Tipografia Geist hospedada no próprio app, ícones Phosphor, contraste WCAG AA verificado,
+  microinterações curtas (150-200 ms, `ease-out` forte) respeitando `prefers-reduced-motion` e painel de filtros
+  recolhível no celular. Polimento guiado pelas skills Impeccable, Taste e Emil Kowalski.

@@ -3,7 +3,7 @@ from app.db.registry import registered_metadata
 
 def test_movie_schema_registers_expected_tables() -> None:
     expected_tables = {
-        "admin_users",
+        "users",
         "bridge_movie_company",
         "bridge_movie_genre",
         "bridge_movie_person",

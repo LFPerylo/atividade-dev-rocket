@@ -4,12 +4,14 @@ import pytest
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.domain.entities import Role
+from app.auth.infrastructure.user_repository import SqlAlchemyUserRepository
 from app.movies.domain.entities import MovieDraft, NewReview
 from app.movies.domain.queries import PageRequest
 from app.movies.domain.rating import Stars
 from app.movies.infrastructure.movie_repository import SqlAlchemyMovieRepository
 from app.movies.infrastructure.review_repository import SqlAlchemyReviewRepository
-from app.movies.models import DimReview
+from app.movies.models import DimReview, MovieReview
 
 
 @pytest.fixture
@@ -107,3 +109,20 @@ async def test_reviews_expose_timezone_aware_utc_timestamps(
     page = await repository.list_for_movie("m-cdd", PageRequest())
 
     assert page.items[0].created_at.tzinfo is UTC
+
+
+async def test_add_links_review_to_its_author(
+    repository: SqlAlchemyReviewRepository, session: AsyncSession
+) -> None:
+    author = await SqlAlchemyUserRepository(session).add("ana@b.dev", "Ana", "h", Role.REVIEWER)
+
+    review = await repository.add(
+        "m-cdd",
+        NewReview(author="Ana", stars=Stars.from_value(4), comment="Bom.", author_id=author.id),
+    )
+    await session.commit()
+
+    assert review.author_id == author.id
+    stored = await session.get(MovieReview, review.id)
+    assert stored is not None
+    assert stored.sk_user_id == author.id

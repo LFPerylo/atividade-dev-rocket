@@ -4,6 +4,7 @@ from fastapi import APIRouter, Query, Request, Response, status
 
 from app.api.v1.dependencies import (
     CurrentAdmin,
+    CurrentUser,
     GenreRepositoryDep,
     MovieRepositoryDep,
     ReviewRepositoryDep,
@@ -121,12 +122,12 @@ async def list_reviews(
 async def add_review(
     movie_id: str,
     payload: ReviewIn,
-    _: CurrentAdmin,
+    user: CurrentUser,
     movies: MovieRepositoryDep,
     reviews: ReviewRepositoryDep,
     transaction: TransactionDep,
 ) -> ReviewOut:
     review = await AddReview(movies, reviews, transaction).execute(
-        movie_id, payload.to_new_review()
+        movie_id, payload.to_new_review(user)
     )
     return ReviewOut.from_review(review)

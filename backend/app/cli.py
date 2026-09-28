@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.auth.application.use_cases import EnsureAdmin
 from app.auth.domain.errors import AuthError
-from app.auth.infrastructure.admin_repository import SqlAlchemyAdminRepository
 from app.auth.infrastructure.password_hasher import Argon2PasswordHasher
+from app.auth.infrastructure.user_repository import SqlAlchemyUserRepository
 from app.core.config import Settings, get_settings
 from app.db.session import enable_sqlite_foreign_keys
 from app.db.transaction import SqlAlchemyTransactionManager
@@ -22,7 +22,7 @@ async def _ensure_admin(settings: Settings, email: str, name: str, password: str
     try:
         async with async_sessionmaker(engine, expire_on_commit=False)() as session:
             use_case = EnsureAdmin(
-                SqlAlchemyAdminRepository(session),
+                SqlAlchemyUserRepository(session),
                 Argon2PasswordHasher(),
                 SqlAlchemyTransactionManager(session),
             )

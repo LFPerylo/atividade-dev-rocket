@@ -18,7 +18,7 @@ export function isValidStarValue(value: number): boolean {
 }
 
 export function formatStars(average: number | null): string {
-  return average === null ? '–' : starsFormatter.format(average)
+  return average === null ? '-' : starsFormatter.format(average)
 }
 
 export function starFill(average: number, index: number): number {

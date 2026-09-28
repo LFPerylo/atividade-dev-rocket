@@ -6,12 +6,13 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthProvider } from '@/features/auth/AuthProvider'
 import { tokenStorage } from '@/infrastructure/storage/tokenStorage'
 import { ToastProvider } from '@/shared/ui/Toast'
-import { VALID_TOKEN } from '@/test/handlers'
+import { REVIEWER_TOKEN, VALID_TOKEN } from '@/test/handlers'
 
 type RenderOptions = {
   route?: string
   path?: string
   authenticated?: boolean
+  as?: 'admin' | 'avaliador'
 }
 
 function LocationProbe() {
@@ -21,9 +22,9 @@ function LocationProbe() {
 
 export function renderWithProviders(
   element: ReactElement,
-  { route = '/', path = '/', authenticated = false }: RenderOptions = {},
+  { route = '/', path = '/', authenticated = false, as = 'admin' }: RenderOptions = {},
 ) {
-  if (authenticated) tokenStorage.save(VALID_TOKEN)
+  if (authenticated) tokenStorage.save(as === 'admin' ? VALID_TOKEN : REVIEWER_TOKEN)
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })

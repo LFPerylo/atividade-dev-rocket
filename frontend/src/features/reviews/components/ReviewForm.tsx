@@ -6,7 +6,7 @@ import { isValidStarValue } from '@/domain/rating'
 import { useAddReview } from '@/features/reviews/api'
 import { ApiError } from '@/infrastructure/http/client'
 import { Button } from '@/shared/ui/Button'
-import { Field, Input, TextArea } from '@/shared/ui/Field'
+import { Field, TextArea } from '@/shared/ui/Field'
 import { StarInput } from '@/shared/ui/StarInput'
 import { useToast } from '@/shared/ui/toastContext'
 
@@ -17,7 +17,6 @@ const reviewSchema = z.object({
     .number({ error: STARS_MESSAGE })
     .nullable()
     .refine((value) => value !== null && isValidStarValue(value), STARS_MESSAGE),
-  nome: z.string().trim().min(1, 'Informe seu nome').max(120, 'Máximo de 120 caracteres'),
   comentario: z
     .string()
     .trim()
@@ -27,14 +26,14 @@ const reviewSchema = z.object({
 
 type ReviewValues = z.input<typeof reviewSchema>
 
-const EMPTY_REVIEW: ReviewValues = { estrelas: null, nome: '', comentario: '' }
+const EMPTY_REVIEW: ReviewValues = { estrelas: null, comentario: '' }
 
 type ReviewFormProps = {
   movieId: string
-  defaultName: string
+  authorName: string
 }
 
-export function ReviewForm({ movieId, defaultName }: ReviewFormProps) {
+export function ReviewForm({ movieId, authorName }: ReviewFormProps) {
   const toast = useToast()
   const addReview = useAddReview(movieId)
   const {
@@ -45,18 +44,17 @@ export function ReviewForm({ movieId, defaultName }: ReviewFormProps) {
     formState: { errors },
   } = useForm<ReviewValues>({
     resolver: zodResolver(reviewSchema),
-    defaultValues: { ...EMPTY_REVIEW, nome: defaultName },
+    defaultValues: EMPTY_REVIEW,
   })
 
   const onSubmit = handleSubmit(async (values) => {
     try {
       await addReview.mutateAsync({
-        nome: values.nome.trim(),
         estrelas: values.estrelas ?? 0,
         comentario: values.comentario.trim(),
       })
       toast.show('Avaliação publicada')
-      reset({ ...EMPTY_REVIEW, nome: values.nome })
+      reset(EMPTY_REVIEW)
     } catch (error) {
       toast.show(error instanceof ApiError ? error.message : 'Falha ao publicar', 'error')
     }
@@ -69,7 +67,10 @@ export function ReviewForm({ movieId, defaultName }: ReviewFormProps) {
       aria-label="Nova avaliação"
       className="flex flex-col gap-4 rounded-xl border border-ink-700 bg-ink-800/60 p-5"
     >
-      <h3 className="font-display text-lg font-semibold text-ink-100">Avaliar este filme</h3>
+      <div>
+        <h3 className="font-display text-lg font-semibold text-ink-100">Avaliar este filme</h3>
+        <p className="text-sm text-ink-400">Avaliando como {authorName}</p>
+      </div>
       <div className="flex flex-col gap-1.5">
         <Controller
           control={control}
@@ -89,9 +90,6 @@ export function ReviewForm({ movieId, defaultName }: ReviewFormProps) {
           </p>
         )}
       </div>
-      <Field id="review-nome" label="Seu nome" error={errors.nome?.message}>
-        <Input id="review-nome" invalid={Boolean(errors.nome)} {...register('nome')} />
-      </Field>
       <Field id="review-comentario" label="Resenha" error={errors.comentario?.message}>
         <TextArea
           id="review-comentario"

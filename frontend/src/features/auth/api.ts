@@ -1,4 +1,4 @@
-import type { Admin } from '@/domain/movie'
+import type { Registration, User } from '@/domain/movie'
 import { apiClient } from '@/infrastructure/http/apiClient'
 
 type TokenResponse = {
@@ -10,5 +10,7 @@ type TokenResponse = {
 export const authApi = {
   login: (email: string, senha: string) =>
     apiClient.post<TokenResponse>('/auth/login', { email, senha }),
-  me: () => apiClient.get<Admin>('/auth/me'),
+  register: (registration: Registration) =>
+    apiClient.post<TokenResponse>('/auth/register', registration),
+  me: () => apiClient.get<User>('/auth/me'),
 }

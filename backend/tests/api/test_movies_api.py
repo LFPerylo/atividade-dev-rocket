@@ -145,3 +145,17 @@ async def test_delete_movie_removes_it(
 
 async def test_delete_movie_requires_authentication(client: httpx.AsyncClient) -> None:
     assert (await client.delete("/movies/m-cdd")).status_code == 401
+
+
+@pytest.mark.parametrize(
+    ("method", "path"),
+    [("post", "/movies"), ("put", "/movies/m-cdd"), ("delete", "/movies/m-cdd")],
+)
+async def test_reviewers_cannot_manage_movies(
+    client: httpx.AsyncClient, reviewer_headers: dict[str, str], method: str, path: str
+) -> None:
+    kwargs = {} if method == "delete" else {"json": NEW_MOVIE}
+    response = await client.request(method.upper(), path, headers=reviewer_headers, **kwargs)
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Apenas administradores podem realizar esta ação"}

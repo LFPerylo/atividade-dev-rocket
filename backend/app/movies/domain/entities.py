@@ -86,6 +86,7 @@ class Review:
     score: float
     comment: str
     created_at: datetime
+    author_id: str | None = None
 
     @property
     def stars(self) -> float:
@@ -152,6 +153,7 @@ class NewReview:
     author: str
     stars: Stars
     comment: str
+    author_id: str | None = None
 
     def __post_init__(self) -> None:
         author = _clean_text(self.author)

@@ -31,7 +31,8 @@ def test_seed_command_loads_data_and_creates_default_admin(
 
     assert exit_code == 0
     assert scalar(database_path, "SELECT COUNT(*) FROM dim_movies") == 2
-    assert scalar(database_path, "SELECT email FROM admin_users") == "admin@rocketlab.dev"
+    admin_email = scalar(database_path, "SELECT email FROM users WHERE papel = 'admin'")
+    assert admin_email == "admin@rocketlab.dev"
 
 
 def test_create_admin_command_adds_admin(database_path: Path, tmp_path: Path) -> None:
@@ -51,7 +52,7 @@ def test_create_admin_command_adds_admin(database_path: Path, tmp_path: Path) ->
     )
 
     assert exit_code == 0
-    assert scalar(database_path, "SELECT name FROM admin_users") == "Outra"
+    assert scalar(database_path, "SELECT name FROM users") == "Outra"
 
 
 def test_create_admin_command_fails_for_invalid_data(database_path: Path, tmp_path: Path) -> None:

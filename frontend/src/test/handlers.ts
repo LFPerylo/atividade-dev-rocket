@@ -1,18 +1,28 @@
 import { http, HttpResponse } from 'msw'
 
-import type { MovieDetails, MovieInput, ReviewInput } from '@/domain/movie'
+import type { MovieDetails, MovieInput, Registration, ReviewInput, User } from '@/domain/movie'
 import { cidadeDeDeus, ensaio, genres, pageOf, reviews } from '@/test/fixtures'
 
 export const API = '*/api/v1'
 export const VALID_TOKEN = 'token-valido'
+export const REVIEWER_TOKEN = 'token-avaliador'
+
+const USERS_BY_TOKEN: Record<string, User> = {
+  [VALID_TOKEN]: { id: 'a1', email: 'admin@rocketlab.dev', nome: 'Administrador', papel: 'admin' },
+  [REVIEWER_TOKEN]: { id: 'u1', email: 'bia@exemplo.com', nome: 'Bia Lima', papel: 'avaliador' },
+}
+
+const tokenOf = (request: Request) =>
+  request.headers.get('authorization')?.replace('Bearer ', '') ?? ''
 
 const movies: Record<string, MovieDetails> = {
   [cidadeDeDeus.id]: cidadeDeDeus,
   [ensaio.id]: ensaio,
 }
 
-const isAuthorized = (request: Request) =>
-  request.headers.get('authorization') === `Bearer ${VALID_TOKEN}`
+const isAuthorized = (request: Request) => tokenOf(request) === VALID_TOKEN
+
+const isLoggedIn = (request: Request) => tokenOf(request) in USERS_BY_TOKEN
 
 const unauthorized = () =>
   HttpResponse.json({ detail: 'Sessão inválida ou expirada' }, { status: 401 })
@@ -29,10 +39,18 @@ export const handlers = [
     }
     return HttpResponse.json({ detail: 'E-mail ou senha inválidos' }, { status: 401 })
   }),
+  http.post(`${API}/auth/register`, async ({ request }) => {
+    const { email } = (await request.json()) as Registration
+    if (email === 'admin@rocketlab.dev') {
+      return HttpResponse.json({ detail: 'Já existe uma conta com este e-mail' }, { status: 409 })
+    }
+    return HttpResponse.json(
+      { access_token: REVIEWER_TOKEN, token_type: 'bearer', expires_in: 3600 },
+      { status: 201 },
+    )
+  }),
   http.get(`${API}/auth/me`, ({ request }) =>
-    isAuthorized(request)
-      ? HttpResponse.json({ id: 'a1', email: 'admin@rocketlab.dev', nome: 'Administrador' })
-      : unauthorized(),
+    isLoggedIn(request) ? HttpResponse.json(USERS_BY_TOKEN[tokenOf(request)]) : unauthorized(),
   ),
   http.get(`${API}/genres`, () => HttpResponse.json(genres)),
   http.get(`${API}/movies`, ({ request }) => {
@@ -63,10 +81,17 @@ export const handlers = [
   ),
   http.get(`${API}/movies/:id/reviews`, () => HttpResponse.json(pageOf(reviews, 1, 5))),
   http.post(`${API}/movies/:id/reviews`, async ({ request }) => {
-    if (!isAuthorized(request)) return unauthorized()
+    if (!isLoggedIn(request)) return unauthorized()
     const input = (await request.json()) as ReviewInput
+    const author = USERS_BY_TOKEN[tokenOf(request)]?.nome ?? ''
     return HttpResponse.json(
-      { id: 'r-new', ...input, nota: input.estrelas * 2, criado_em: '2026-09-24T12:00:00Z' },
+      {
+        id: 'r-new',
+        nome: author,
+        ...input,
+        nota: input.estrelas * 2,
+        criado_em: '2026-09-24T12:00:00Z',
+      },
       { status: 201 },
     )
   }),

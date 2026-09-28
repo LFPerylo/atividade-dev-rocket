@@ -1,4 +1,4 @@
-from app.auth.domain.entities import AccessToken, AdminUser
+from app.auth.domain.entities import AccessToken, Role, User
 from app.auth.domain.errors import InvalidToken
 
 
@@ -29,19 +29,23 @@ class FakeTokenService:
         return token.removeprefix("token:")
 
 
-class InMemoryAdminRepository:
+class InMemoryUserRepository:
     def __init__(self) -> None:
-        self.admins: dict[str, AdminUser] = {}
+        self.users: dict[str, User] = {}
 
-    async def find_by_email(self, email: str) -> AdminUser | None:
-        return next((admin for admin in self.admins.values() if admin.email == email), None)
+    async def find_by_email(self, email: str) -> User | None:
+        return next((user for user in self.users.values() if user.email == email), None)
 
-    async def get(self, admin_id: str) -> AdminUser | None:
-        return self.admins.get(admin_id)
+    async def get(self, user_id: str) -> User | None:
+        return self.users.get(user_id)
 
-    async def add(self, email: str, name: str, password_hash: str) -> AdminUser:
-        admin = AdminUser(
-            id=f"a{len(self.admins) + 1}", email=email, name=name, password_hash=password_hash
+    async def add(self, email: str, name: str, password_hash: str, role: Role) -> User:
+        user = User(
+            id=f"u{len(self.users) + 1}",
+            email=email,
+            name=name,
+            role=role,
+            password_hash=password_hash,
         )
-        self.admins[admin.id] = admin
-        return admin
+        self.users[user.id] = user
+        return user

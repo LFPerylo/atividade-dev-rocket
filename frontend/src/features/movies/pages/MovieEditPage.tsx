@@ -31,10 +31,7 @@ export function MovieEditPage() {
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-8">
-      <div>
-        <p className="text-sm text-ink-400">Editando</p>
-        <h1 className="font-display text-4xl font-semibold text-ink-100">{movie.titulo}</h1>
-      </div>
+      <h1 className="font-display text-4xl font-semibold text-ink-100">Editar “{movie.titulo}”</h1>
       <MovieForm
         initialValues={toFormValues(movie)}
         submitLabel="Salvar alterações"

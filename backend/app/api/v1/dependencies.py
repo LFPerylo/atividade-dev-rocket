@@ -4,12 +4,17 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.application.use_cases import DECOY_PASSWORD, AuthenticateAdmin, GetCurrentAdmin
-from app.auth.domain.entities import AdminUser
+from app.auth.application.use_cases import (
+    DECOY_PASSWORD,
+    AuthenticateUser,
+    GetCurrentUser,
+    RegisterReviewer,
+)
+from app.auth.domain.entities import User
 from app.auth.domain.errors import InvalidToken
-from app.auth.infrastructure.admin_repository import SqlAlchemyAdminRepository
 from app.auth.infrastructure.jwt_token_service import JwtTokenService
 from app.auth.infrastructure.password_hasher import Argon2PasswordHasher
+from app.auth.infrastructure.user_repository import SqlAlchemyUserRepository
 from app.core.config import get_settings
 from app.db.session import get_db
 from app.db.transaction import SqlAlchemyTransactionManager
@@ -56,21 +61,33 @@ ReviewRepositoryDep = Annotated[SqlAlchemyReviewRepository, Depends(get_review_r
 TransactionDep = Annotated[SqlAlchemyTransactionManager, Depends(get_transaction)]
 
 
-def get_authenticate_admin(session: SessionDep, tokens: TokenServiceDep) -> AuthenticateAdmin:
-    return AuthenticateAdmin(
-        SqlAlchemyAdminRepository(session), password_hasher, tokens, decoy_hash
-    )
+def get_authenticate_user(session: SessionDep, tokens: TokenServiceDep) -> AuthenticateUser:
+    return AuthenticateUser(SqlAlchemyUserRepository(session), password_hasher, tokens, decoy_hash)
 
 
-async def get_current_admin(
+def get_register_reviewer(
+    session: SessionDep, tokens: TokenServiceDep, transaction: TransactionDep
+) -> RegisterReviewer:
+    return RegisterReviewer(SqlAlchemyUserRepository(session), password_hasher, tokens, transaction)
+
+
+async def get_current_user(
     session: SessionDep,
     tokens: TokenServiceDep,
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
-) -> AdminUser:
+) -> User:
     if credentials is None:
         raise InvalidToken()
-    use_case = GetCurrentAdmin(SqlAlchemyAdminRepository(session), tokens)
+    use_case = GetCurrentUser(SqlAlchemyUserRepository(session), tokens)
     return await use_case.execute(credentials.credentials)
 
 
-CurrentAdmin = Annotated[AdminUser, Depends(get_current_admin)]
+CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+def get_current_admin(user: CurrentUser) -> User:
+    user.require_admin()
+    return user
+
+
+CurrentAdmin = Annotated[User, Depends(get_current_admin)]

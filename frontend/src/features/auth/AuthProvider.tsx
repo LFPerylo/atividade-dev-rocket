@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 
+import type { Registration } from '@/domain/movie'
 import { authApi } from '@/features/auth/api'
 import { AuthContext, type AuthStatus } from '@/features/auth/authContext'
 import { UNAUTHORIZED_EVENT } from '@/infrastructure/http/apiClient'
@@ -25,14 +26,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.removeQueries({ queryKey: ['auth'] })
   }, [queryClient])
 
-  const login = useCallback(
-    async (email: string, senha: string) => {
-      const { access_token: newToken } = await authApi.login(email, senha)
+  const startSession = useCallback(
+    async (newToken: string) => {
       tokenStorage.save(newToken)
       await queryClient.fetchQuery({ queryKey: meKey(newToken), queryFn: authApi.me })
       setToken(newToken)
     },
     [queryClient],
+  )
+
+  const login = useCallback(
+    async (email: string, senha: string) => {
+      const { access_token } = await authApi.login(email, senha)
+      await startSession(access_token)
+    },
+    [startSession],
+  )
+
+  const register = useCallback(
+    async (registration: Registration) => {
+      const { access_token } = await authApi.register(registration)
+      await startSession(access_token)
+    },
+    [startSession],
   )
 
   useEffect(() => {
@@ -42,9 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const status: AuthStatus =
     token === null || me.isError ? 'anonymous' : me.data ? 'authenticated' : 'loading'
-  const admin = status === 'authenticated' ? (me.data ?? null) : null
+  const user = status === 'authenticated' ? (me.data ?? null) : null
+  const isAdmin = user?.papel === 'admin'
 
-  const value = useMemo(() => ({ status, admin, login, logout }), [status, admin, login, logout])
+  const value = useMemo(
+    () => ({ status, user, isAdmin, login, register, logout }),
+    [status, user, isAdmin, login, register, logout],
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

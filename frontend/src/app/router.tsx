@@ -3,7 +3,7 @@ import { createBrowserRouter, Outlet } from 'react-router-dom'
 import { Layout } from '@/app/Layout'
 import { NotFoundPage } from '@/app/NotFoundPage'
 import { PageLoading } from '@/app/PageLoading'
-import { RequireAuth } from '@/features/auth/RequireAuth'
+import { RequireAdmin } from '@/features/auth/RequireAdmin'
 import { CatalogPage } from '@/features/movies/pages/CatalogPage'
 
 export const router = createBrowserRouter([
@@ -18,6 +18,13 @@ export const router = createBrowserRouter([
           import('@/features/auth/LoginPage').then(({ LoginPage }) => ({ Component: LoginPage })),
       },
       {
+        path: 'cadastro',
+        lazy: () =>
+          import('@/features/auth/RegisterPage').then(({ RegisterPage }) => ({
+            Component: RegisterPage,
+          })),
+      },
+      {
         path: 'filmes/:id',
         lazy: () =>
           import('@/features/movies/pages/MovieDetailsPage').then(({ MovieDetailsPage }) => ({
@@ -26,9 +33,9 @@ export const router = createBrowserRouter([
       },
       {
         element: (
-          <RequireAuth>
+          <RequireAdmin>
             <Outlet />
-          </RequireAuth>
+          </RequireAdmin>
         ),
         children: [
           {

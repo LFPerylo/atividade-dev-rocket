@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
+from app.auth.domain.entities import User
 from app.movies.domain.entities import (
     Genre,
     MovieDetails,
@@ -150,13 +151,15 @@ class MovieIn(BaseModel):
 
 
 class ReviewIn(BaseModel):
-    nome: str = Field(max_length=120)
     estrelas: float
     comentario: str = Field(max_length=4000)
 
-    def to_new_review(self) -> NewReview:
+    def to_new_review(self, author: User) -> NewReview:
         return NewReview(
-            author=self.nome, stars=Stars.from_value(self.estrelas), comment=self.comentario
+            author=author.name,
+            author_id=author.id,
+            stars=Stars.from_value(self.estrelas),
+            comment=self.comentario,
         )
 
 

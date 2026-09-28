@@ -1,3 +1,5 @@
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react'
+
 import { Button } from '@/shared/ui/Button'
 
 type PaginationProps = {
@@ -15,8 +17,9 @@ export function Pagination({ page, pages, onChange }: PaginationProps) {
         aria-label="Página anterior"
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
+        className="px-3"
       >
-        ←
+        <CaretLeftIcon aria-hidden="true" weight="bold" className="size-4" />
       </Button>
       <span className="text-sm text-ink-400 tabular-nums">
         Página {page} de {pages}
@@ -26,8 +29,9 @@ export function Pagination({ page, pages, onChange }: PaginationProps) {
         aria-label="Próxima página"
         disabled={page >= pages}
         onClick={() => onChange(page + 1)}
+        className="px-3"
       >
-        →
+        <CaretRightIcon aria-hidden="true" weight="bold" className="size-4" />
       </Button>
     </nav>
   )

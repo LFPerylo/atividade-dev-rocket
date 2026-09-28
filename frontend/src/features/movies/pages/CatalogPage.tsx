@@ -1,21 +1,28 @@
+import { SlidersHorizontalIcon } from '@phosphor-icons/react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { DEFAULT_FILTERS } from '@/domain/filters'
 import { useAuth } from '@/features/auth/authContext'
 import { useMovies } from '@/features/movies/api'
 import { FiltersPanel } from '@/features/movies/components/FiltersPanel'
 import { MovieGrid, MovieGridSkeleton } from '@/features/movies/components/MovieGrid'
 import { SearchBar } from '@/features/movies/components/SearchBar'
 import { useCatalogFilters } from '@/features/movies/useCatalogFilters'
+import { Button } from '@/shared/ui/Button'
 import { buttonClasses } from '@/shared/ui/buttonStyles'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { Pagination } from '@/shared/ui/Pagination'
 
 const countFormatter = new Intl.NumberFormat('pt-BR')
+const FILTER_KEYS = ['genero', 'anoDe', 'anoAte', 'estrelasMin'] as const
 
 export function CatalogPage() {
-  const { status } = useAuth()
+  const { isAdmin } = useAuth()
   const { filters, update } = useCatalogFilters()
   const { data, isPending, isError, isPlaceholderData } = useMovies(filters)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const activeFilters = FILTER_KEYS.filter((key) => filters[key] !== DEFAULT_FILTERS[key]).length
 
   return (
     <section className="flex flex-col gap-8">
@@ -26,7 +33,7 @@ export function CatalogPage() {
             {data ? `${countFormatter.format(data.total)} filmes` : 'Carregando…'}
           </p>
         </div>
-        {status === 'authenticated' && (
+        {isAdmin && (
           <Link to="/filmes/novo" className={buttonClasses('primary')}>
             Adicionar filme
           </Link>
@@ -38,7 +45,19 @@ export function CatalogPage() {
           initialValue={filters.busca}
           onSearch={(busca) => update({ busca }, { replace: true })}
         />
-        <FiltersPanel filters={filters} onChange={update} />
+        <Button
+          variant="ghost"
+          className="self-start md:hidden"
+          aria-expanded={filtersOpen}
+          aria-controls="catalog-filters"
+          onClick={() => setFiltersOpen((open) => !open)}
+        >
+          <SlidersHorizontalIcon aria-hidden="true" weight="bold" className="size-4" />
+          Filtros{activeFilters > 0 && ` (${activeFilters})`}
+        </Button>
+        <div id="catalog-filters" className={filtersOpen ? 'block' : 'hidden md:block'}>
+          <FiltersPanel filters={filters} onChange={update} />
+        </div>
       </div>
 
       {isPending && <MovieGridSkeleton />}

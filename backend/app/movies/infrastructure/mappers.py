@@ -80,4 +80,5 @@ def to_review(model: MovieReview) -> Review:
         score=model.nota,
         comment=model.comentario,
         created_at=model.created_at.replace(tzinfo=UTC),
+        author_id=model.sk_user_id,
     )

@@ -8,8 +8,8 @@ const CAST_LIMIT = 12
 function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <dt className="text-xs font-semibold tracking-wide text-ink-600 uppercase">{label}</dt>
-      <dd className="text-sm text-ink-200">{children}</dd>
+      <dt className="text-sm text-ink-400">{label}</dt>
+      <dd className="text-sm font-medium text-ink-100">{children}</dd>
     </div>
   )
 }
@@ -36,7 +36,7 @@ export function MovieFacts({ movie }: { movie: MovieDetails }) {
         <Fact label="IMDb">
           {performance.nota_imdb.toFixed(1)}
           {performance.votos_imdb != null && (
-            <span className="text-ink-600">
+            <span className="text-ink-500">
               {' '}
               · {formatCompactNumber(performance.votos_imdb)} votos
             </span>
@@ -50,7 +50,7 @@ export function MovieFacts({ movie }: { movie: MovieDetails }) {
       {revenue && <Fact label="Bilheteria">{revenue}</Fact>}
       {movie.elenco.length > 0 && (
         <div className="col-span-full flex flex-col gap-2">
-          <dt className="text-xs font-semibold tracking-wide text-ink-600 uppercase">Elenco</dt>
+          <dt className="text-sm text-ink-400">Elenco</dt>
           <dd>
             <ul className="flex flex-wrap gap-2">
               {movie.elenco.slice(0, CAST_LIMIT).map((actor) => (

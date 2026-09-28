@@ -32,3 +32,6 @@ playwright-report/
 test-results/
 *.tsbuildinfo
 .mypy_cache/
+
+# Skills de terceiros (instaladas localmente)
+.claude/skills/
