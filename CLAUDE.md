@@ -6,7 +6,7 @@ Design completo em `docs/superpowers/specs/2026-09-24-sistema-avaliacao-filmes-d
 ## Stack
 
 - Backend: FastAPI, SQLAlchemy 2.0 async (aiosqlite), Alembic, Pydantic v2, PyJWT, pwdlib (argon2). Python 3.12, gerenciado com `uv`.
-- Frontend: Vite, React, TypeScript, React Router, TanStack Query, react-hook-form + zod, Tailwind CSS.
+- Frontend: Vite, React, TypeScript, React Router, TanStack Query, react-hook-form + zod, Tailwind CSS, fonte Geist (self-hosted) e ícones Phosphor.
 - Testes: pytest (+ pytest-asyncio, httpx), Vitest + Testing Library + MSW, Playwright, Storybook.
 - Qualidade: ruff + mypy strict no backend; oxlint + tsc + Prettier no frontend.
 - Banco: SQLite (`backend/rocketlab.db`). Dados iniciais em `backend/data/seed/*.csv.gz`.
@@ -35,6 +35,8 @@ docker compose up --build   # produto completo em http://localhost:8080
   - `infrastructure/` implementa os ports; `app/api/v1` só traduz HTTP ↔ casos de uso.
 - Frontend: `domain/` puro, `infrastructure/` para HTTP/armazenamento, `features/<nome>` com api/components/pages, `shared/ui` sem regra de negócio. Todo componente de `shared/ui` tem story.
 - Tabelas só mudam via migration Alembic.
+- UI: sem glifos Unicode como ícone, sem travessão (—/–) em texto visível, texto com contraste ≥ 4,5:1, animações só em `transform`/`opacity` com `motion-safe:`.
+- Skills de design de terceiros ficam em `.claude/skills/` (fora do Git).
 - Commits pequenos, em português, no padrão Conventional Commits (`feat:`, `fix:`, `test:`, `refactor:`, `chore:`, `docs:`, `ci:`). Nunca adicionar `Co-Authored-By`.
 
 ## Domínio
@@ -42,4 +44,5 @@ docker compose up --build   # produto completo em http://localhost:8080
 - Notas são armazenadas de 0 a 10 (`movie_reviews.nota`). A interface usa estrelas de 1 a 5 em passos de 0,5: `nota = estrelas * 2`.
 - Os CSVs são o gabarito: a carga não trata os dados (só converte vazio em nulo e texto em data/número). Nada de normalizar, deduplicar ou recalcular.
 - A média exibida vem de `dim_reviews` (carregado do CSV). Nova avaliação atualiza o resumo de forma incremental na mesma transação: `(média × qtd + nota) / (qtd + 1)`.
-- Leitura é pública; criar, editar, remover filmes e avaliar exige token JWT de administrador.
+- Papéis em `users.papel`: `admin` gerencia o catálogo; `avaliador` (criado em `/auth/register`) só avalia. Leitura é pública.
+- Avaliação nova usa o nome da conta e grava `movie_reviews.sk_user_id`; avaliações do gabarito ficam sem usuário.
