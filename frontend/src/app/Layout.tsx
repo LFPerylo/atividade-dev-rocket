@@ -6,7 +6,7 @@ import { buttonClasses } from '@/shared/ui/buttonStyles'
 
 function Logo() {
   return (
-    <Link to="/" aria-label="Claquete — início" className="flex items-center gap-2">
+    <Link to="/" aria-label="Claquete, página inicial" className="flex items-center gap-2">
       <svg viewBox="0 0 32 32" aria-hidden="true" className="size-8">
         <rect width="32" height="32" rx="7" fill="#1c2228" />
         <path d="M6 13h20v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" fill="#00e054" />
@@ -27,14 +27,14 @@ export function Layout() {
       <header className="sticky top-0 z-40 border-b border-ink-800 bg-ink-900/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Logo />
-          <nav className="flex items-center gap-2 text-sm">
+          <nav className="flex items-center gap-1 text-sm sm:gap-2">
             <NavLink
               to="/"
               end
               className={({ isActive }) =>
                 isActive
-                  ? 'px-3 py-2 font-semibold text-ink-100'
-                  : 'px-3 py-2 text-ink-400 hover:text-ink-100'
+                  ? 'hidden px-3 py-2 font-semibold text-ink-100 sm:block'
+                  : 'hidden px-3 py-2 text-ink-400 hover:text-ink-100 sm:block'
               }
             >
               Filmes
@@ -62,8 +62,8 @@ export function Layout() {
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
         <Outlet />
       </main>
-      <footer className="border-t border-ink-800 py-6 text-center text-xs text-ink-600">
-        Claquete · RocketLab 2026 · Dados de filmes fornecidos pelo TMDB
+      <footer className="border-t border-ink-800 px-4 py-6 text-center text-xs text-ink-500">
+        Claquete, RocketLab 2026. Dados de filmes fornecidos pelo TMDB.
       </footer>
     </div>
   )

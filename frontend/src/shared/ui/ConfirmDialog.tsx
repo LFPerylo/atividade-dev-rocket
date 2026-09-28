@@ -33,13 +33,13 @@ export function ConfirmDialog({
 
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-ink-950/80 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-ink-950/80 p-4 transition-opacity duration-200 ease-out starting:opacity-0">
       <dialog
         open
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
-        className="static w-full max-w-md rounded-xl border border-ink-700 bg-ink-800 p-6 text-ink-200 shadow-2xl"
+        className="static w-full max-w-md rounded-xl border border-ink-700 bg-ink-800 p-6 text-ink-200 shadow-2xl shadow-ink-950/70 transition-[opacity,transform] duration-200 ease-out starting:opacity-0 motion-safe:starting:scale-[0.96]"
       >
         <h2 id={titleId} className="font-display text-xl font-semibold text-ink-100">
           {title}

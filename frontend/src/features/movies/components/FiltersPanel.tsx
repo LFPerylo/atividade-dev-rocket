@@ -1,3 +1,5 @@
+import { SortAscendingIcon, SortDescendingIcon } from '@phosphor-icons/react'
+
 import type { CatalogFilters, SortField } from '@/domain/filters'
 import { STAR_VALUES, formatStars } from '@/domain/rating'
 import { useGenres } from '@/features/movies/api'
@@ -70,7 +72,7 @@ export function FiltersPanel({ filters, onChange }: FiltersPanelProps) {
           <option value="">Qualquer</option>
           {STAR_VALUES.map((value) => (
             <option key={value} value={value}>
-              {formatStars(value)}★ ou mais
+              {formatStars(value)} estrelas ou mais
             </option>
           ))}
         </Select>
@@ -94,7 +96,12 @@ export function FiltersPanel({ filters, onChange }: FiltersPanelProps) {
           className="w-full"
           onClick={() => onChange({ ordem: filters.ordem === 'asc' ? 'desc' : 'asc' })}
         >
-          {filters.ordem === 'asc' ? '↑ Crescente' : '↓ Decrescente'}
+          {filters.ordem === 'asc' ? (
+            <SortAscendingIcon aria-hidden="true" weight="bold" className="size-4" />
+          ) : (
+            <SortDescendingIcon aria-hidden="true" weight="bold" className="size-4" />
+          )}
+          {filters.ordem === 'asc' ? 'Crescente' : 'Decrescente'}
         </Button>
       </div>
     </div>

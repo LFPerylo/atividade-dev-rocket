@@ -33,7 +33,7 @@ export function ReviewList({ movieId }: { movieId: string }) {
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-semibold text-ink-100">{review.nome}</span>
               <StarRating value={review.estrelas} size="sm" />
-              <time dateTime={review.criado_em} className="text-xs text-ink-600">
+              <time dateTime={review.criado_em} className="text-xs text-ink-500">
                 {formatDate(review.criado_em)}
               </time>
             </div>

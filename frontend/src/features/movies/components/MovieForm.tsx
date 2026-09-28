@@ -87,9 +87,7 @@ export function MovieForm({
           </Field>
         </div>
         <fieldset className="flex flex-col gap-2 md:col-span-2">
-          <legend className="mb-1.5 text-xs font-semibold tracking-wide text-ink-400 uppercase">
-            Gêneros
-          </legend>
+          <legend className="mb-1.5 text-sm font-medium text-ink-200">Gêneros</legend>
           <div className="flex flex-wrap gap-2">
             {genres.map((genre) => {
               const checked = selectedGenres.includes(genre.id)

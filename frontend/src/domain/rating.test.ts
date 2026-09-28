@@ -18,7 +18,7 @@ describe('rating', () => {
   it('formats averages in Brazilian notation', () => {
     expect(formatStars(4.5)).toBe('4,5')
     expect(formatStars(3)).toBe('3,0')
-    expect(formatStars(null)).toBe('–')
+    expect(formatStars(null)).toBe('-')
   })
 
   it.each([

@@ -15,6 +15,8 @@ test('visitor searches the catalog and opens a movie', async ({ page }) => {
 
 test('visitor filters by genre and sorts by title', async ({ page }) => {
   await page.goto('/')
+  const filtersToggle = page.getByRole('button', { name: /^Filtros/ })
+  if (await filtersToggle.isVisible()) await filtersToggle.click()
 
   await page.getByLabel('Gênero').selectOption({ label: 'Western' })
   await page.getByLabel('Ordenar por').selectOption('titulo')

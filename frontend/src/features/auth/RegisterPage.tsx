@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
+import { AuthLayout } from '@/features/auth/AuthLayout'
 import { useAuth } from '@/features/auth/authContext'
 import { safeRedirect, withNext } from '@/features/auth/redirect'
 import { ApiError } from '@/infrastructure/http/client'
@@ -49,18 +50,22 @@ export function RegisterPage() {
   })
 
   return (
-    <section className="mx-auto flex max-w-sm flex-col gap-6 py-16">
-      <header className="text-center">
-        <h1 className="font-display text-3xl font-semibold text-ink-100">Crie sua conta</h1>
-        <p className="mt-2 text-sm text-ink-400">
-          Avalie os filmes que você viu e acompanhe as notas.
-        </p>
-      </header>
-      <form
-        onSubmit={onSubmit}
-        noValidate
-        className="flex flex-col gap-4 rounded-xl border border-ink-700 bg-ink-800 p-6"
-      >
+    <AuthLayout
+      title="Crie sua conta"
+      description="Avalie os filmes que você viu e acompanhe as notas."
+      footer={
+        <>
+          Já tem conta?{' '}
+          <Link
+            to={withNext('/login', next)}
+            className="font-semibold text-accent-400 hover:underline"
+          >
+            Entrar
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         <Field id="nome" label="Nome" error={errors.nome?.message}>
           <Input
             id="nome"
@@ -105,15 +110,6 @@ export function RegisterPage() {
           Criar conta
         </Button>
       </form>
-      <p className="text-center text-sm text-ink-400">
-        Já tem conta?{' '}
-        <Link
-          to={withNext('/login', next)}
-          className="font-semibold text-accent-400 hover:underline"
-        >
-          Entrar
-        </Link>
-      </p>
-    </section>
+    </AuthLayout>
   )
 }

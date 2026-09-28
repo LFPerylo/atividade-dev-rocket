@@ -13,14 +13,14 @@ export function MovieCard({ movie }: { movie: MovieSummary }) {
       <MoviePoster
         title={movie.titulo}
         url={movie.url_poster}
-        className="transition duration-200 group-hover:-translate-y-1 group-hover:ring-2 group-hover:ring-accent-400"
+        className="transition-[transform,box-shadow] duration-200 ease-out group-hover:ring-2 group-hover:ring-accent-400 motion-safe:group-hover:-translate-y-1 motion-safe:group-active:scale-[0.98]"
       />
       <div className="flex flex-col gap-1 px-0.5">
         <h3 className="line-clamp-2 text-sm leading-snug font-semibold text-ink-100">
           {movie.titulo}
         </h3>
         <div className="flex items-center justify-between gap-2 text-xs text-ink-400">
-          <span>{movie.ano_lancamento ?? '—'}</span>
+          <span>{movie.ano_lancamento ?? 'Sem ano'}</span>
           <span className="flex items-center gap-1">
             <StarRating value={movie.media_estrelas} size="sm" />
             {movie.total_avaliacoes > 0 && (

@@ -11,7 +11,10 @@ describe('Layout', () => {
 
     expect(screen.getByRole('link', { name: 'Entrar' })).toHaveAttribute('href', '/login')
     expect(screen.getByRole('link', { name: 'Criar conta' })).toHaveAttribute('href', '/cadastro')
-    expect(screen.getByRole('link', { name: 'Claquete — início' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Claquete, página inicial' })).toHaveAttribute(
+      'href',
+      '/',
+    )
   })
 
   it('shows the admin and logs out', async () => {
