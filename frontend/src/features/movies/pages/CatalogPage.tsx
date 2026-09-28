@@ -13,7 +13,7 @@ import { Pagination } from '@/shared/ui/Pagination'
 const countFormatter = new Intl.NumberFormat('pt-BR')
 
 export function CatalogPage() {
-  const { status } = useAuth()
+  const { isAdmin } = useAuth()
   const { filters, update } = useCatalogFilters()
   const { data, isPending, isError, isPlaceholderData } = useMovies(filters)
 
@@ -26,7 +26,7 @@ export function CatalogPage() {
             {data ? `${countFormatter.format(data.total)} filmes` : 'Carregando…'}
           </p>
         </div>
-        {status === 'authenticated' && (
+        {isAdmin && (
           <Link to="/filmes/novo" className={buttonClasses('primary')}>
             Adicionar filme
           </Link>

@@ -2,6 +2,7 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 
 import { formatRuntime } from '@/domain/format'
 import { useAuth } from '@/features/auth/authContext'
+import { withNext } from '@/features/auth/redirect'
 import { useMovie } from '@/features/movies/api'
 import { DeleteMovieButton } from '@/features/movies/components/DeleteMovieButton'
 import { MovieFacts } from '@/features/movies/components/MovieFacts'
@@ -19,7 +20,7 @@ const NOT_FOUND = 404
 export function MovieDetailsPage() {
   const { id = '' } = useParams()
   const location = useLocation()
-  const { status, admin } = useAuth()
+  const { status, user, isAdmin } = useAuth()
   const { data: movie, isPending, error } = useMovie(id)
 
   if (isPending) {
@@ -48,9 +49,9 @@ export function MovieDetailsPage() {
     )
   }
 
-  const isAdmin = status === 'authenticated'
   const runtime = formatRuntime(movie.duracao_minutos)
-  const loginLink = `/login?next=${encodeURIComponent(location.pathname)}`
+  const loginLink = withNext('/login', location.pathname)
+  const registerLink = withNext('/cadastro', location.pathname)
 
   return (
     <article className="flex flex-col gap-12">
@@ -125,15 +126,19 @@ export function MovieDetailsPage() {
           <ReviewList movieId={movie.id} />
         </div>
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          {isAdmin ? (
-            <ReviewForm movieId={movie.id} defaultName={admin?.nome ?? ''} />
+          {status === 'authenticated' && user ? (
+            <ReviewForm movieId={movie.id} authorName={user.nome} />
           ) : (
             <div className="rounded-xl border border-ink-700 bg-ink-800/60 p-5 text-sm text-ink-400">
-              Quer registrar uma avaliação?{' '}
+              Viu este filme?{' '}
               <Link to={loginLink} className="font-semibold text-accent-400 hover:underline">
-                Entre como administrador
-              </Link>
-              .
+                Entre
+              </Link>{' '}
+              ou{' '}
+              <Link to={registerLink} className="font-semibold text-accent-400 hover:underline">
+                crie uma conta
+              </Link>{' '}
+              para avaliar.
             </div>
           )}
         </aside>

@@ -6,10 +6,11 @@ import { tokenStorage } from '@/infrastructure/storage/tokenStorage'
 import { renderWithProviders } from '@/test/render'
 
 describe('Layout', () => {
-  it('offers login to visitors', () => {
+  it('offers login and sign-up to visitors', () => {
     renderWithProviders(<Layout />)
 
     expect(screen.getByRole('link', { name: 'Entrar' })).toHaveAttribute('href', '/login')
+    expect(screen.getByRole('link', { name: 'Criar conta' })).toHaveAttribute('href', '/cadastro')
     expect(screen.getByRole('link', { name: 'Claquete — início' })).toHaveAttribute('href', '/')
   })
 

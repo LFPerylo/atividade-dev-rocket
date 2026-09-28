@@ -53,3 +53,14 @@ describe('LoginPage', () => {
     await waitFor(() => expect(currentLocation(container)).toBe('/'))
   })
 })
+
+describe('LoginPage sign-up link', () => {
+  it('links to account creation keeping the destination', () => {
+    renderWithProviders(<LoginPage />, { route: '/login?next=/filmes/m-cdd', path: '/login' })
+
+    expect(screen.getByRole('link', { name: 'Criar conta' })).toHaveAttribute(
+      'href',
+      '/cadastro?next=%2Ffilmes%2Fm-cdd',
+    )
+  })
+})

@@ -20,7 +20,7 @@ function Logo() {
 }
 
 export function Layout() {
-  const { status, admin, logout } = useAuth()
+  const { status, user, logout } = useAuth()
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -41,15 +41,20 @@ export function Layout() {
             </NavLink>
             {status === 'authenticated' ? (
               <>
-                <span className="hidden text-ink-400 sm:inline">{admin?.nome}</span>
+                <span className="hidden text-ink-400 sm:inline">{user?.nome}</span>
                 <Button variant="ghost" onClick={logout}>
                   Sair
                 </Button>
               </>
             ) : (
-              <Link to="/login" className={buttonClasses('secondary')}>
-                Entrar
-              </Link>
+              <>
+                <Link to="/login" className="px-3 py-2 text-ink-400 hover:text-ink-100">
+                  Entrar
+                </Link>
+                <Link to="/cadastro" className={buttonClasses('primary')}>
+                  Criar conta
+                </Link>
+              </>
             )}
           </nav>
         </div>

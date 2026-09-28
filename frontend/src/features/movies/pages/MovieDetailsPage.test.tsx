@@ -8,11 +8,14 @@ import { API } from '@/test/handlers'
 import { currentLocation, renderWithProviders } from '@/test/render'
 import { server } from '@/test/server'
 
-const renderDetails = (options: { authenticated?: boolean; route?: string } = {}) =>
+const renderDetails = (
+  options: { authenticated?: boolean; route?: string; as?: 'admin' | 'avaliador' } = {},
+) =>
   renderWithProviders(<MovieDetailsPage />, {
     route: options.route ?? '/filmes/m-cdd',
     path: '/filmes/:id',
     authenticated: options.authenticated,
+    as: options.as,
   })
 
 describe('MovieDetailsPage', () => {
@@ -55,46 +58,58 @@ describe('MovieDetailsPage', () => {
     expect(await screen.findByText('Filme não encontrado')).toBeInTheDocument()
   })
 
-  it('invites visitors to log in before reviewing', async () => {
+  it('invites visitors to sign in or create an account before reviewing', async () => {
     renderDetails()
 
-    const link = await screen.findByRole('link', { name: 'Entre como administrador' })
-    expect(link).toHaveAttribute('href', '/login?next=%2Ffilmes%2Fm-cdd')
+    expect(await screen.findByRole('link', { name: 'Entre' })).toHaveAttribute(
+      'href',
+      '/login?next=%2Ffilmes%2Fm-cdd',
+    )
+    expect(screen.getByRole('link', { name: 'crie uma conta' })).toHaveAttribute(
+      'href',
+      '/cadastro?next=%2Ffilmes%2Fm-cdd',
+    )
     expect(screen.queryByRole('button', { name: 'Publicar avaliação' })).not.toBeInTheDocument()
   })
 
-  it('lets admins publish a review', async () => {
+  it('lets reviewers publish a review under their account', async () => {
     let payload: ReviewInput | null = null
     server.use(
       http.post(`${API}/movies/m-cdd/reviews`, async ({ request }) => {
         payload = (await request.json()) as ReviewInput
         return HttpResponse.json(
-          { id: 'r9', ...payload, nota: 9, criado_em: '2026-09-24T12:00:00Z' },
+          { id: 'r9', nome: 'Bia Lima', ...payload, nota: 9, criado_em: '2026-09-24T12:00:00Z' },
           { status: 201 },
         )
       }),
     )
-    renderDetails({ authenticated: true })
+    renderDetails({ authenticated: true, as: 'avaliador' })
 
-    await userEvent.click(await screen.findByRole('radio', { name: '4,5 estrelas' }))
-    expect(await screen.findByDisplayValue('Administrador')).toBeInTheDocument()
-    await userEvent.clear(screen.getByLabelText('Seu nome'))
-    await userEvent.type(screen.getByLabelText('Seu nome'), 'Carla')
+    expect(await screen.findByText('Avaliando como Bia Lima')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('radio', { name: '4,5 estrelas' }))
     await userEvent.type(screen.getByLabelText('Resenha'), 'Montagem impecável.')
     await userEvent.click(screen.getByRole('button', { name: 'Publicar avaliação' }))
 
     expect(await screen.findByText('Avaliação publicada')).toBeInTheDocument()
-    expect(payload).toEqual({ nome: 'Carla', estrelas: 4.5, comentario: 'Montagem impecável.' })
+    expect(payload).toEqual({ estrelas: 4.5, comentario: 'Montagem impecável.' })
     await waitFor(() => expect(screen.getByLabelText('Resenha')).toHaveValue(''))
   })
 
   it('requires stars before publishing a review', async () => {
-    renderDetails({ authenticated: true })
+    renderDetails({ authenticated: true, as: 'avaliador' })
 
     await userEvent.type(await screen.findByLabelText('Resenha'), 'Bom.')
     await userEvent.click(screen.getByRole('button', { name: 'Publicar avaliação' }))
 
     expect(await screen.findByText('Escolha de 1 a 5 estrelas')).toBeInTheDocument()
+  })
+
+  it('hides movie management from reviewers', async () => {
+    renderDetails({ authenticated: true, as: 'avaliador' })
+
+    await screen.findByText('Avaliando como Bia Lima')
+    expect(screen.queryByRole('link', { name: 'Editar' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Remover' })).not.toBeInTheDocument()
   })
 
   it('lets admins edit the movie', async () => {

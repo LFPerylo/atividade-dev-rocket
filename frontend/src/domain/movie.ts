@@ -68,13 +68,21 @@ export type MovieInput = {
 }
 
 export type ReviewInput = {
-  nome: string
   estrelas: number
   comentario: string
 }
 
-export type Admin = {
+export type Role = 'admin' | 'avaliador'
+
+export type User = {
   id: string
   email: string
   nome: string
+  papel: Role
+}
+
+export type Registration = {
+  nome: string
+  email: string
+  senha: string
 }

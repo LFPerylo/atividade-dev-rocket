@@ -100,3 +100,12 @@ describe('CatalogPage', () => {
     expect(screen.queryByRole('link', { name: 'Adicionar filme' })).not.toBeInTheDocument()
   })
 })
+
+describe('CatalogPage for reviewers', () => {
+  it('hides movie creation', async () => {
+    renderWithProviders(<CatalogPage />, { authenticated: true, as: 'avaliador' })
+    await screen.findByRole('link', { name: /Cidade de Deus/ })
+
+    expect(screen.queryByRole('link', { name: 'Adicionar filme' })).not.toBeInTheDocument()
+  })
+})

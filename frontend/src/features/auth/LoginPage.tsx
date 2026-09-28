@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useAuth } from '@/features/auth/authContext'
+import { safeRedirect, withNext } from '@/features/auth/redirect'
 import { ApiError } from '@/infrastructure/http/client'
 import { Button } from '@/shared/ui/Button'
 import { Field, Input } from '@/shared/ui/Field'
@@ -16,14 +17,11 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>
 
-function safeRedirect(target: string | null): string {
-  return target?.startsWith('/') && !target.startsWith('//') ? target : '/'
-}
-
 export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const [params] = useSearchParams()
+  const next = params.get('next')
   const [serverError, setServerError] = useState<string | null>(null)
   const {
     register,
@@ -35,7 +33,7 @@ export function LoginPage() {
     setServerError(null)
     try {
       await login(email, senha)
-      navigate(safeRedirect(params.get('next')), { replace: true })
+      navigate(safeRedirect(next), { replace: true })
     } catch (error) {
       setServerError(error instanceof ApiError ? error.message : 'Não foi possível entrar')
     }
@@ -44,10 +42,8 @@ export function LoginPage() {
   return (
     <section className="mx-auto flex max-w-sm flex-col gap-6 py-16">
       <header className="text-center">
-        <h1 className="font-display text-3xl font-semibold text-ink-100">Área do administrador</h1>
-        <p className="mt-2 text-sm text-ink-400">
-          Entre para cadastrar filmes e registrar avaliações.
-        </p>
+        <h1 className="font-display text-3xl font-semibold text-ink-100">Entrar</h1>
+        <p className="mt-2 text-sm text-ink-400">Acesse sua conta para avaliar filmes.</p>
       </header>
       <form
         onSubmit={onSubmit}
@@ -81,6 +77,15 @@ export function LoginPage() {
           Entrar
         </Button>
       </form>
+      <p className="text-center text-sm text-ink-400">
+        Ainda não tem conta?{' '}
+        <Link
+          to={withNext('/cadastro', next)}
+          className="font-semibold text-accent-400 hover:underline"
+        >
+          Criar conta
+        </Link>
+      </p>
     </section>
   )
 }

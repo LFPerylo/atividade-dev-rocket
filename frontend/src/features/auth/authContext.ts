@@ -1,13 +1,15 @@
 import { createContext, useContext } from 'react'
 
-import type { Admin } from '@/domain/movie'
+import type { Registration, User } from '@/domain/movie'
 
 export type AuthStatus = 'loading' | 'authenticated' | 'anonymous'
 
 export type AuthContextValue = {
   status: AuthStatus
-  admin: Admin | null
+  user: User | null
+  isAdmin: boolean
   login: (email: string, senha: string) => Promise<void>
+  register: (registration: Registration) => Promise<void>
   logout: () => void
 }
 
